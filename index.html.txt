@@ -1,0 +1,1998 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Macvanny — Cardápio Musical</title>
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --card-dark: rgba(30, 30, 30, 0.9);
+            --item-dark: rgba(37, 37, 37, 0.92);
+            --accent: #f39c12;
+            --accent-hover: #e67e22;
+            --text-main: #e0e0e0;
+            --text-muted: #aaaaaa;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Marca d'água em tela cheia com a foto do blazer escuro */
+        .watermark-layer {
+            position: fixed;
+            inset: 0;
+            background-size: cover;
+            background-position: center top;
+            background-repeat: no-repeat;
+            opacity: 0.14;
+            filter: grayscale(35%) contrast(1.08);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .watermark-overlay {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at top, rgba(18, 18, 18, 0.55) 0%, rgba(18, 18, 18, 0.9) 75%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 600px;
+            margin: 0 auto;
+            background: var(--card-dark);
+            backdrop-filter: blur(8px);
+            padding: 22px 20px;
+            border-radius: 14px;
+            border: 1px solid rgba(243, 156, 18, 0.22);
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.65);
+        }
+
+        /* Tela inicial pós-QR Code */
+        .landing-view {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 16px;
+            padding: 8px 0 4px 0;
+        }
+
+        .landing-logo-box {
+            width: 100%;
+            max-width: 280px;
+            min-height: 86px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(15, 15, 15, 0.85);
+            border: 1px solid rgba(243, 156, 18, 0.35);
+            border-radius: 12px;
+            padding: 10px 16px;
+        }
+
+        .landing-logo-box img {
+            max-width: 100%;
+            max-height: 76px;
+            object-fit: contain;
+            display: block;
+        }
+
+        .hero-photo-frame {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid var(--accent);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+            background: #181818;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hero-photo-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center top;
+            display: block;
+        }
+
+        .artist-heading {
+            margin: 0;
+            font-size: 1.45rem;
+            color: #ffffff;
+            letter-spacing: 0.4px;
+        }
+
+        .artist-tagline {
+            margin: 0;
+            font-size: 0.92rem;
+            color: var(--text-muted);
+        }
+
+        .social-links {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 4px;
+        }
+
+        .social-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.95rem;
+            color: #ffffff;
+            background: rgba(42, 42, 42, 0.92);
+            border: 1px solid #4d4d4d;
+            transition: all 0.2s ease;
+        }
+
+        .social-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: translateY(-1px);
+        }
+
+        .enter-menu-btn {
+            width: 100%;
+            margin-top: 12px;
+            padding: 15px 18px;
+            border: none;
+            border-radius: 10px;
+            background: var(--accent);
+            color: #121212;
+            font-size: 1.02rem;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(243, 156, 18, 0.35);
+            transition: background 0.2s ease, transform 0.15s ease;
+        }
+
+        .enter-menu-btn:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        /* Cabeçalho da página de pedidos */
+        .menu-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 6px;
+        }
+
+        .thumb-avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            object-fit: cover;
+            object-position: center top;
+            border: 2px solid var(--accent);
+            background: #181818;
+            flex-shrink: 0;
+        }
+
+        .menu-title {
+            margin: 0;
+            text-align: center;
+            color: var(--accent);
+            font-size: 1.35rem;
+            flex: 1;
+        }
+
+        .header-logo {
+            max-width: 96px;
+            max-height: 46px;
+            object-fit: contain;
+            background: rgba(15, 15, 15, 0.75);
+            padding: 4px 6px;
+            border-radius: 6px;
+            flex-shrink: 0;
+        }
+
+        .top-bar-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .back-link-btn {
+            background: transparent;
+            border: 1px solid #444;
+            color: #ccc;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .back-link-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        p.subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin: 4px 0 10px 0;
+        }
+
+        .meta-info {
+            text-align: center;
+            color: #9a9a9a;
+            font-size: 0.82rem;
+            margin-bottom: 12px;
+        }
+
+        .filters { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+        .filters-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 6px 0;
+            background: rgba(44, 44, 44, 0.94);
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        textarea { resize: vertical; min-height: 70px; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); }
+
+        .clear-btn {
+            width: 100%;
+            padding: 10px;
+            margin-top: 4px;
+            background: rgba(44, 44, 44, 0.9);
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .clear-btn:hover { background: var(--accent); color: #121212; }
+
+        .song-card {
+            background: var(--item-dark);
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .song-info h3 { margin: 0; font-size: 1rem; color: #fff; }
+        .song-info p { margin: 4px 0 0 0; font-size: 0.8rem; color: var(--text-muted); }
+        .actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+        .badge { background: #333; color: var(--accent); padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+
+        .request-btn {
+            background: var(--accent);
+            color: #121212;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .request-btn:hover { background: var(--accent-hover); }
+
+        .empty-prompt {
+            text-align: center;
+            color: #9e9e9e;
+            background: rgba(24, 24, 24, 0.75);
+            border: 1px dashed #444;
+            border-radius: 10px;
+            padding: 22px 14px;
+            margin-top: 8px;
+            font-size: 0.9rem;
+        }
+
+        .requests-header { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+        .requests-header h2 { margin: 0; font-size: 1.1rem; color: var(--accent); }
+        .secondary-btn { background: #2c2c2c; color: #e0e0e0; border: 1px solid #555; padding: 7px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; cursor: pointer; }
+        .secondary-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .request-card { background: #252525; padding: 12px; margin: 8px 0; border-radius: 8px; border-left: 4px solid var(--accent); }
+        .request-card.played { opacity: 0.6; border-left-color: #666; }
+        .request-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+        .request-top h3 { margin: 0; font-size: 1rem; color: #fff; }
+        .request-time { font-size: 0.75rem; color: #999; flex-shrink: 0; }
+        .request-artist { margin: 3px 0 0 0; font-size: 0.82rem; color: #bbb; }
+        .request-sender { margin: 6px 0 0 0; font-size: 0.82rem; color: var(--accent); font-weight: bold; }
+        .request-tip { margin: 6px 0 0 0; font-size: 0.82rem; color: #2ecc71; font-weight: bold; }
+        .request-message { margin: 6px 0 0 0; font-size: 0.88rem; color: #eee; background: #1c1c1c; padding: 8px 10px; border-radius: 6px; border: 1px solid #333; }
+        .request-actions { display: flex; gap: 8px; margin-top: 10px; }
+        .host-footer { margin-top: 18px; text-align: center; }
+        .host-dot { background: transparent; border: none; color: #555; font-size: 0.9rem; cursor: pointer; padding: 4px 8px; }
+        .host-dot:hover { color: var(--accent); }
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #121212; padding: 10px 18px; border-radius: 8px; font-weight: bold; font-size: 0.9rem; box-shadow: 0 4px 12px rgba(0,0,0,0.4); z-index: 2000; display: none; }
+
+        .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.78); display: none; justify-content: center; align-items: center; padding: 16px; z-index: 1500; overflow-y: auto; }
+        .modal-backdrop.open { display: flex; }
+        .modal-box { width: 100%; max-width: 460px; background: #1e1e1e; border: 1px solid #444; border-radius: 12px; padding: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.65); max-height: 92vh; overflow-y: auto; }
+        .modal-box h2 { margin: 0 0 4px 0; font-size: 1.2rem; color: var(--accent); }
+        .modal-song { margin: 0 0 12px 0; font-size: 0.9rem; color: #ccc; }
+        .modal-box label { display: block; font-size: 0.85rem; color: #ccc; margin-top: 8px; }
+
+        .pix-section { margin-top: 12px; padding: 12px; background: #252525; border: 1px solid #3a3a3a; border-radius: 10px; }
+        .pix-title { margin: 0 0 8px 0; font-size: 0.9rem; color: var(--accent); font-weight: bold; }
+        .pix-presets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 8px; }
+        .pix-chip { background: #2c2c2c; color: #fff; border: 1px solid #555; padding: 8px 6px; border-radius: 8px; font-weight: bold; font-size: 0.88rem; cursor: pointer; }
+        .pix-chip.active, .pix-chip:hover { background: var(--accent); color: #121212; border-color: var(--accent); }
+        .pix-custom-row { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+        .pix-custom-row span { color: #bbb; font-size: 0.85rem; white-space: nowrap; }
+        .pix-custom-row input { margin: 0; padding: 8px 10px; font-size: 0.92rem; }
+        .pix-clear-amount { background: transparent; border: none; color: #aaa; font-size: 0.78rem; text-decoration: underline; cursor: pointer; padding: 4px 0; margin-top: 4px; }
+        .pix-clear-amount:hover { color: var(--accent); }
+        .pix-generated-box { margin-top: 10px; padding: 12px; background: #1a1a1a; border: 1px dashed var(--accent); border-radius: 8px; display: none; text-align: center; }
+        .pix-generated-box.visible { display: block; }
+        .pix-amount-label { font-size: 0.95rem; color: var(--accent); font-weight: bold; margin-bottom: 8px; }
+        .qr-canvas { background: #fff; padding: 8px; border-radius: 8px; display: inline-block; margin-bottom: 8px; }
+        .pix-code-box { background: #262626; border: 1px solid #444; border-radius: 6px; padding: 8px; font-size: 0.75rem; color: #ddd; word-break: break-all; text-align: left; margin-bottom: 8px; }
+        .copy-pix-btn { background: #2c2c2c; color: var(--accent); border: 1px solid var(--accent); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; cursor: pointer; }
+        .copy-pix-btn:hover { background: var(--accent); color: #121212; }
+
+        .confirmation-panel { display: none; text-align: center; }
+        .confirmation-panel.visible { display: block; }
+        .order-confirm-box { background: #252525; border-left: 4px solid var(--accent); border-radius: 8px; padding: 14px; margin-bottom: 12px; text-align: left; }
+        .order-confirm-box h3 { margin: 0 0 4px 0; color: #fff; font-size: 1.05rem; }
+        .order-confirm-box p { margin: 0; color: #ddd; font-size: 0.92rem; }
+        .pix-pay-step { background: #252525; border: 1px solid #444; border-radius: 10px; padding: 14px; margin-bottom: 12px; }
+        .confirm-pay-btn { width: 100%; background: #27ae60; color: #fff; border: none; padding: 10px 14px; border-radius: 8px; font-weight: bold; font-size: 0.92rem; cursor: pointer; margin-top: 8px; }
+        .confirm-pay-btn:hover { background: #219150; }
+        .thanks-box { display: none; background: rgba(46, 204, 113, 0.12); border: 1px solid #2ecc71; border-radius: 10px; padding: 14px; margin-bottom: 12px; text-align: left; }
+        .thanks-box.visible { display: block; }
+        .thanks-box h4 { margin: 0 0 6px 0; color: #2ecc71; font-size: 1rem; }
+        .thanks-box p { margin: 0; color: #eee; font-size: 0.9rem; line-height: 1.45; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 14px; }
+        .cancel-btn { background: #2c2c2c; color: #ccc; border: 1px solid #555; padding: 9px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .confirm-btn { background: var(--accent); color: #121212; border: none; padding: 9px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .confirm-btn:hover { background: var(--accent-hover); }
+
+        @media (max-width: 520px) {
+            .filters-row { grid-template-columns: 1fr; gap: 0; }
+            .menu-title { font-size: 1.15rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="watermark-layer" id="watermarkLayer"></div>
+    <div class="watermark-overlay"></div>
+
+    <div class="container">
+        <!-- 1. TELA INICIAL (AO ESCANEAR O QR CODE) -->
+        <section id="landingView" class="landing-view">
+            <div class="landing-logo-box">
+                <img id="landingLogoImg" alt="Logomarca Macvanny">
+            </div>
+
+            <div class="hero-photo-frame">
+                <img id="landingHeroImg" alt="Foto Macvanny">
+            </div>
+
+            <h1 class="artist-heading">Macvanny</h1>
+            <p class="artist-tagline">Voz, Violão, Guitarra &amp; Música ao Vivo</p>
+
+            <div class="social-links">
+                <a class="social-btn" href="https://www.instagram.com/macvannyoficial?utm_source=ig_web_button_share_sheet&gwpx=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener noreferrer">
+                    Instagram — @macvannyoficial
+                </a>
+                <a class="social-btn" href="https://www.tiktok.com/@macvanny?is_from_webapp=1&sender_device=pc" target="_blank" rel="noopener noreferrer">
+                    TikTok — @macvanny
+                </a>
+                <a class="social-btn" href="https://wa.me/5587999052249" target="_blank" rel="noopener noreferrer">
+                    WhatsApp — (87) 99905-2249
+                </a>
+            </div>
+
+            <button type="button" class="enter-menu-btn" onclick="openMenuScreen()">
+                Fazer pedido de música
+            </button>
+        </section>
+
+        <!-- 2. TELA DE PEDIDOS (CARDÁPIO MUSICAL) -->
+        <section id="catalogView" style="display: none;">
+            <div class="top-bar-actions">
+                <button type="button" class="back-link-btn" onclick="openLandingScreen()">← Início</button>
+            </div>
+
+            <div class="menu-header">
+                <img id="thumbPhotoImg" class="thumb-avatar" alt="Foto Macvanny">
+                <h1 class="menu-title">Cardápio Musical</h1>
+                <img id="headerLogoImg" class="header-logo" alt="Logomarca Macvanny">
+            </div>
+
+            <p class="subtitle">Escolha um estilo, artista ou digite para buscar sua música!</p>
+            <div class="meta-info" id="songCount"></div>
+
+            <div class="filters">
+                <input type="text" id="searchInput" placeholder="Pesquisar por música ou artista..." onkeyup="filterSongs()" oninput="filterSongs()">
+
+                <div class="filters-row">
+                    <select id="genreSelect" onchange="filterSongs()">
+                        <option value="">Escolha um Estilo</option>
+                        <option value="Axé">Axé</option>
+                        <option value="Bolero">Bolero</option>
+                        <option value="Bossa Nova">Bossa Nova</option>
+                        <option value="Brega">Brega</option>
+                        <option value="Católica">Católica</option>
+                        <option value="Forró">Forró</option>
+                        <option value="Frevo">Frevo</option>
+                        <option value="Gospel">Gospel</option>
+                        <option value="Internacional">Internacional</option>
+                        <option value="Jovem Guarda">Jovem Guarda</option>
+                        <option value="MPB">MPB</option>
+                        <option value="Outro">Outro</option>
+                        <option value="Pagode">Pagode</option>
+                        <option value="Pop">Pop</option>
+                        <option value="Reggae">Reggae</option>
+                        <option value="Rock">Rock</option>
+                        <option value="Samba">Samba</option>
+                        <option value="Samba Rock">Samba Rock</option>
+                        <option value="Seresta">Seresta</option>
+                        <option value="Sertanejo">Sertanejo</option>
+                        <option value="Soul">Soul</option>
+                    </select>
+
+                    <select id="artistSelect" onchange="filterSongs()">
+                        <option value="">Escolha um Artista</option>
+                    </select>
+                </div>
+
+                <button type="button" class="clear-btn" onclick="clearFilters()">Limpar filtros</button>
+            </div>
+
+            <div id="songList"></div>
+        </section>
+
+        <!-- 3. FILA INTERNA DE PEDIDOS (RESTRITA / ATALHO DO MÚSICO) -->
+        <section id="requestsView" style="display: none;">
+            <div class="requests-header">
+                <h2>Pedidos Recebidos (<span id="requestBadgeCount">0</span> pendentes)</h2>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" class="secondary-btn" onclick="openMenuScreen()">Voltar ao cardápio</button>
+                    <button type="button" class="secondary-btn" onclick="clearRequests()">Limpar fila</button>
+                </div>
+            </div>
+            <div id="requestsList"></div>
+        </section>
+
+        <div class="host-footer">
+            <button type="button" class="host-dot" title="Fila de pedidos" onclick="toggleHostRequests()">•</button>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="requestModal" onclick="handleBackdropClick(event)">
+        <div class="modal-box">
+            <div id="orderFormPanel">
+                <h2>Enviar Pedido</h2>
+                <p class="modal-song" id="modalSongInfo"></p>
+
+                <form id="requestForm" onsubmit="submitRequest(event)">
+                    <label for="requesterName">Seu nome (opcional)</label>
+                    <input type="text" id="requesterName" placeholder="Ex.: Ana, Carlos...">
+
+                    <label for="requestMessage">Mensagem ou dedicatória (opcional)</label>
+                    <textarea id="requestMessage" placeholder="Ex.: Feliz aniversário para a Júlia! / Pedido de casamento hoje..."></textarea>
+
+                    <div class="pix-section">
+                        <p class="pix-title">Contribuição Pix (opcional)</p>
+                        <div class="pix-presets">
+                            <button type="button" class="pix-chip" data-amount="5" onclick="selectPresetAmount(5, this)">R$ 5,00</button>
+                            <button type="button" class="pix-chip" data-amount="10" onclick="selectPresetAmount(10, this)">R$ 10,00</button>
+                            <button type="button" class="pix-chip" data-amount="15" onclick="selectPresetAmount(15, this)">R$ 15,00</button>
+                        </div>
+
+                        <div class="pix-custom-row">
+                            <span>Outro valor (R$):</span>
+                            <input type="number" id="customPixAmount" min="0.50" step="0.50" placeholder="Ex.: 20,00" oninput="handleCustomAmountInput()">
+                        </div>
+
+                        <button type="button" class="pix-clear-amount" onclick="clearPixSelection()">Enviar pedido sem contribuição</button>
+
+                        <div class="pix-generated-box" id="pixGeneratedPreview">
+                            <div class="pix-amount-label" id="previewPixAmountText"></div>
+                            <div class="qr-canvas">
+                                <canvas id="previewQrCanvas" width="136" height="136"></canvas>
+                            </div>
+                            <div class="pix-code-box" id="previewPixCode"></div>
+                            <button type="button" class="copy-pix-btn" onclick="copyPixCode('previewPixCode')">Copiar chave Pix</button>
+                        </div>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="cancel-btn" onclick="closeRequestModal()">Cancelar</button>
+                        <button type="submit" class="confirm-btn">Enviar pedido</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="confirmation-panel" id="confirmationPanel">
+                <h2>Pedido Confirmado!</h2>
+
+                <div class="order-confirm-box">
+                    <h3 id="confirmedSongTitle"></h3>
+                    <p>Prontinho! Seu pedido já entrou na minha lista.</p>
+                </div>
+
+                <div class="pix-pay-step" id="confirmedPixStep" style="display: none;">
+                    <div class="pix-amount-label" id="confirmedPixAmountLabel"></div>
+                    <p style="margin: 0 0 8px 0; font-size: 0.85rem; color: #ccc;">Escaneie o QR Code ou copie o código Pix abaixo para concluir sua contribuição:</p>
+                    <div class="qr-canvas">
+                        <canvas id="confirmedQrCanvas" width="148" height="148"></canvas>
+                    </div>
+                    <div class="pix-code-box" id="confirmedPixCode"></div>
+                    <button type="button" class="copy-pix-btn" onclick="copyPixCode('confirmedPixCode')">Copiar chave Pix</button>
+                    <button type="button" class="confirm-pay-btn" id="markContributionDoneBtn" onclick="confirmContributionCompleted()">Confirmar que realizei a contribuição</button>
+                </div>
+
+                <div class="thanks-box" id="contributionThanksBox">
+                    <h4>Contribuição confirmada! Muito obrigado!</h4>
+                    <p id="contributionThanksText"></p>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="confirm-btn" onclick="closeRequestModal()">Voltar ao repertório</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        /*
+         * Cole aqui os links públicos das suas imagens quando publicar/hospedar:
+         * - logoUrl: MACVANNY LOGOMARCA 1.png
+         * - thumbUrl: MAC PNG 2023.jpg (camisa branca com listra / miniatura)
+         * - backgroundUrl: IMG_0929.jpg (blazer escuro / plano de fundo)
+         */
+        const MEDIA_CONFIG = {
+    logoUrl: "./logo.png",
+    thumbUrl: "./miniatura.png",
+    backgroundUrl: "./fundo.png"
+};
+
+        function createFallbackLogoDataUrl() {
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="320" height="86" viewBox="0 0 320 86">
+                <rect width="320" height="86" rx="10" fill="#121212"/>
+                <text x="160" y="42" text-anchor="middle" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="800" letter-spacing="2">MACVANNY</text>
+                <text x="160" y="66" text-anchor="middle" fill="#f39c12" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="700" letter-spacing="3">MÚSICA AO VIVO</text>
+            </svg>`;
+            return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+        }
+
+        function createFallbackPortraitDataUrl(label) {
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300">
+                <rect width="300" height="300" fill="#1d1d1d"/>
+                <circle cx="150" cy="115" r="52" fill="#3a3a3a"/>
+                <path d="M60 265 C60 205, 240 205, 240 265 Z" fill="#3a3a3a"/>
+                <text x="150" y="286" text-anchor="middle" fill="#f39c12" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="700">${label}</text>
+            </svg>`;
+            return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+        }
+
+        function applyMediaAssets() {
+            const fallbackLogo = createFallbackLogoDataUrl();
+            const fallbackThumb = createFallbackPortraitDataUrl("MACVANNY");
+            const fallbackBg = createFallbackPortraitDataUrl("MARCA D'ÁGUA");
+
+            const logoSrc = MEDIA_CONFIG.logoUrl.trim() || fallbackLogo;
+            const thumbSrc = MEDIA_CONFIG.thumbUrl.trim() || fallbackThumb;
+            const bgSrc = MEDIA_CONFIG.backgroundUrl.trim() || fallbackBg;
+
+            const landingLogo = document.getElementById("landingLogoImg");
+            const headerLogo = document.getElementById("headerLogoImg");
+            const landingHero = document.getElementById("landingHeroImg");
+            const thumbPhoto = document.getElementById("thumbPhotoImg");
+            const watermarkLayer = document.getElementById("watermarkLayer");
+
+            landingLogo.onerror = () => { landingLogo.src = fallbackLogo; };
+            headerLogo.onerror = () => { headerLogo.src = fallbackLogo; };
+            landingHero.onerror = () => { landingHero.src = fallbackThumb; };
+            thumbPhoto.onerror = () => { thumbPhoto.src = fallbackThumb; };
+
+            landingLogo.src = logoSrc;
+            headerLogo.src = logoSrc;
+            landingHero.src = thumbSrc;
+            thumbPhoto.src = thumbSrc;
+
+            watermarkLayer.style.backgroundImage = `url("${bgSrc}")`;
+        }
+
+        const STORAGE_KEY = 'cardapio_musical_pedidos_v1';
+        let selectedSong = null;
+        let selectedPixAmount = 0;
+        let activeRequestId = null;
+
+        const repertorio = [
+            // Bloco 1 (25 músicas)
+            { titulo: "100% você", artista: "Chiclete Com Banana", estilo: "Axé", tom: "", capo: "", visivel: true },
+            { titulo: "12 Horas", artista: "Dilsinho", estilo: "Pagode", tom: "", capo: "", visivel: true },
+            { titulo: "20 E POUCOS ANOS", artista: "Fábio Jr", estilo: "MPB", tom: "", capo: "", visivel: true },
+            { titulo: "24 HORAS DE AMOR", artista: "Bruno e Marrone", estilo: "Sertanejo", tom: "", capo: "", visivel: true },
+            { titulo: "3 X 4", artista: "Engenheiros do Hawaii", estilo: "Rock", tom: "", capo: "", visivel: true },
+            { titulo: "A Barca", artista: "Padre Zezinho", estilo: "Católica", tom: "", capo: "", visivel: true },
+            { titulo: "A CANÇÃO TOCOU NA HORA ERRADA", artista: "Ana Carolina", estilo: "MPB", tom: "", capo: "", visivel: true },
+            { titulo: "A Carta", artista: "Milionário e José Rico", estilo: "Sertanejo", tom: "", capo: "", visivel: true },
+            { titulo: "A Dama de Vermelho", artista: "Bruno e Marrone", estilo: "Sertanejo", tom: "", capo: "", visivel: true },
+            { titulo: "A DESCONHECIDA", artista: "Fernando Mendes", estilo: "Sertanejo", tom: "", capo: "", visivel: true },
+            { titulo: "A DISTÂNCIA", artista: "Roberto Carlos", estilo: "MPB", tom: "", capo: "", visivel: true },
+            { titulo: "A Dor desse Amor", artista: "KLB", estilo: "MPB", tom: "", capo: "", visivel: true },
+            { titulo: "A Fila Andou", artista: "Chiclete Com Banana", estilo: "Axé", tom: "", capo: "", visivel: true },
+            { titulo: "A Força do Amor", artista: "Roupa Nova", estilo: "MPB", tom: "", capo: "", visivel: true },
+            { titulo: "A Gente se Entrega", artista: "Rionegro e Solimões", estilo: "Sertanejo", tom: "", capo: "", visivel: true },
+            { titulo: "A Grande Família", artista: "Dudu Nobre", estilo: "Pagode", tom: "", capo: "", visivel: true },
+            { titulo: "A LISTA", artista: "Oswaldo Montenegro", estilo: "MPB", tom: "", capo: "", visivel: true },
+            { titulo: "A Maior Saudade", artista: "Henrique e Juliano", estilo: "Sertanejo", tom: "", capo: "", visivel: true },
+            { titulo: "A Minha História", artista: "José Augusto", estilo: "Sertanejo", tom: "", capo: "", visivel: true },
+            { titulo: "A Natureza das Coisas", artista: "Flávio José", estilo: "Forró", tom: "", capo: "", visivel: true },
+            { titulo: "A Noite", artista: "Tiê", estilo: "MPB", tom: "", capo: "", visivel: true },
+            { titulo: "A NOVIDADE", artista: "Os Paralamas do Sucesso", estilo: "Reggae", tom: "", capo: "", visivel: true },
+            { titulo: "A PALO SECO", artista: "Belchior", estilo: "MPB", tom: "", capo: "", visivel: true },
+            { titulo: "A Porta do Céu", artista: "Comunidade Católica Shalom", estilo: "Católica", tom: "", capo: "", visivel: true },
+            { titulo: "A PRIMEIRA VISTA", artista: "Emílio Santiago", estilo: "MPB", tom: "", capo: "", visivel: true },
+
+            // Bloco 2 (25 músicas)
+            { titulo: "A Raposa e as Uvas", artista: "Reginaldo Rossi", estilo: "Brega", tom: "F", capo: "não", visivel: true },
+            { titulo: "A Rota do Indivíduo", artista: "Djavan", estilo: "MPB", tom: "A", capo: "não", visivel: true },
+            { titulo: "A SORRIR", artista: "Cartola", estilo: "MPB", tom: "E", capo: "não", visivel: true },
+            { titulo: "A TERCEIRA LÂMINA", artista: "Zé Ramalho", estilo: "MPB", tom: "Bm", capo: "não", visivel: true },
+            { titulo: "A VIAGEM", artista: "Roupa Nova", estilo: "MPB", tom: "A", capo: "não", visivel: true },
+            { titulo: "A Vida do Viajante", artista: "Luiz Gonzaga", estilo: "Forró", tom: "C", capo: "não", visivel: true },
+            { titulo: "A Vida é Assim", artista: "Conde do Forró", estilo: "Brega", tom: "Am", capo: "não", visivel: true },
+            { titulo: "A VIDA É VOCÊ", artista: "Flávio José", estilo: "Forró", tom: "A", capo: "não", visivel: true },
+            { titulo: "A Vida Tem Dessas Coisas", artista: "Ritchie", estilo: "MPB", tom: "Bm", capo: "não", visivel: true },
+            { titulo: "A VOLTA DA ASA BRANCA", artista: "Luiz Gonzaga", estilo: "Forró", tom: "E", capo: "não", visivel: true },
+            { titulo: "Abençoa", artista: "Outro", estilo: "Católica", tom: "Dm", capo: "não", visivel: true },
+            { titulo: "Acredite em Mim", artista: "Outro", estilo: "MPB", tom: "D", capo: "não", visivel: true },
+            { titulo: "ADMIRÁVEL GADO NOVO", artista: "Zé Ramalho", estilo: "MPB", tom: "F", capo: "não", visivel: true },
+            { titulo: "Adoro Amar Você", artista: "Daniel", estilo: "Sertanejo", tom: "B", capo: "1ª casa", visivel: true },
+            { titulo: "AGONIA", artista: "Oswaldo Montenegro", estilo: "MPB", tom: "D", capo: "não", visivel: true },
+            { titulo: "Agora ou Jamais", artista: "Ritchie", estilo: "MPB", tom: "A", capo: "não", visivel: true },
+            { titulo: "ÁGUA COM AÇÚCAR", artista: "Luan Santana", estilo: "Sertanejo", tom: "D", capo: "não", visivel: true },
+            { titulo: "Água de beber", artista: "Vinicius de Moraes", estilo: "Bossa Nova", tom: "B", capo: "não", visivel: true },
+            { titulo: "AGUENTA CORAÇÃO", artista: "José Augusto", estilo: "MPB", tom: "C", capo: "não", visivel: true },
+            { titulo: "AH! MOLEQUE", artista: "Molejo", estilo: "Pagode", tom: "D", capo: "não", visivel: true },
+            { titulo: "AINDA BEM", artista: "Marisa Monte", estilo: "MPB", tom: "Gm", capo: "não", visivel: true },
+            { titulo: "AINDA É CEDO", artista: "Legião Urbana", estilo: "Rock", tom: "F#m", capo: "não", visivel: true },
+            { titulo: "Ainda há tempo", artista: "Limão Com Mel", estilo: "Forró", tom: "F", capo: "não", visivel: true },
+            { titulo: "AINDA ONTEM CHOREI DE SAUDADE", artista: "João Mineiro e Marciano", estilo: "Sertanejo", tom: "C", capo: "não", visivel: true },
+            { titulo: "Alegrai-vos e Exultai", artista: "Comunidade Católica Shalom", estilo: "Católica", tom: "", capo: "", visivel: true },
+
+            // Bloco 3 (25 músicas)
+            { titulo: "Aleluia Deus é Fiel", artista: "Comunidade Católica Shalom", estilo: "Católica", tom: "E", capo: "não", visivel: true },
+            { titulo: "ALL STAR", artista: "Nando Reis", estilo: "MPB", tom: "E", capo: "não", visivel: true },
+            { titulo: "ALMA GÊMEA", artista: "Fábio Jr", estilo: "MPB", tom: "G", capo: "não", visivel: true },
+            { titulo: "ALVEJANTE", artista: "Zé Vaqueiro", estilo: "Sertanejo", tom: "F#m", capo: "não", visivel: true },
+            { titulo: "AMADA AMANTE", artista: "Roberto Carlos", estilo: "MPB", tom: "D", capo: "não", visivel: true },
+            { titulo: "AMANHÃ", artista: "Sorriso Maroto", estilo: "Pagode", tom: "C", capo: "não", visivel: true },
+            { titulo: "AMANHÃ TALVEZ", artista: "Joanna", estilo: "MPB", tom: "D", capo: "não", visivel: true },
+            { titulo: "AMANTE A MODA ANTIGA", artista: "Roberto Carlos", estilo: "MPB", tom: "F", capo: "não", visivel: true },
+            { titulo: "Amantes", artista: "Araketu", estilo: "Axé", tom: "B", capo: "não", visivel: true },
+            { titulo: "Amar É", artista: "Roupa Nova", estilo: "MPB", tom: "E", capo: "não", visivel: true },
+            { titulo: "Amar Seus Defeitos", artista: "Arreio de Ouro", estilo: "Forró", tom: "G", capo: "não", visivel: true },
+            { titulo: "Amigo", artista: "Roberto Carlos", estilo: "MPB", tom: "Am", capo: "não", visivel: true },
+            { titulo: "Amigos para Sempre", artista: "Agnaldo Rayol", estilo: "MPB", tom: "D", capo: "não", visivel: true },
+            { titulo: "Amor I love You", artista: "Marisa Monte", estilo: "MPB", tom: "A", capo: "não", visivel: true },
+            { titulo: "AMOR PERFEITO", artista: "Roberto Carlos", estilo: "MPB", tom: "Gm", capo: "não", visivel: true },
+            { titulo: "AMOR SELVAGEM", artista: "Zezé Di Camargo e Luciano", estilo: "Sertanejo", tom: "D", capo: "não", visivel: true },
+            { titulo: "Amor verdadeiro", artista: "Só Pra Contrariar", estilo: "Pagode", tom: "C", capo: "não", visivel: true },
+            { titulo: "Ana Maria", artista: "Santanna O Cantador", estilo: "Forró", tom: "C", capo: "não", visivel: true },
+            { titulo: "Andança", artista: "Beth Carvalho", estilo: "Pagode", tom: "A", capo: "não", visivel: true },
+            { titulo: "ANJO", artista: "Roupa Nova", estilo: "MPB", tom: "D", capo: "não", visivel: true },
+            { titulo: "ANJO DE CÉU", artista: "Maskavo", estilo: "MPB", tom: "B", capo: "não", visivel: true },
+            { titulo: "Anna Julia", artista: "Los Hermanos", estilo: "Rock", tom: "D", capo: "não", visivel: true },
+            { titulo: "ANOS DOURADOS", artista: "Tom Jobim", estilo: "Bolero", tom: "A", capo: "não", visivel: true },
+            { titulo: "Ao Ouvir Tua Voz", artista: "Comunidade Católica Shalom", estilo: "Católica", tom: "C", capo: "não", visivel: true },
+            { titulo: "AONDE VOCÊ MORA", artista: "Cidade Negra", estilo: "Reggae", tom: "G", capo: "não", visivel: true },
+
+            // Bloco 4 (25 músicas)
+            { titulo: "APELIDO CARINHOSO", artista: "Gusttavo Lima", estilo: "Sertanejo", tom: "F#m", capo: "não", visivel: true },
+            { titulo: "APENAS MAIS UMA DE AMOR", artista: "Lulu Santos", estilo: "Rock", tom: "F", capo: "não", visivel: true },
+            { titulo: "AQUELA ESTRELA", artista: "Vander Lee", estilo: "MPB", tom: "Am", capo: "não", visivel: true },
+            { titulo: "AQUELAS COISAS", artista: "João Gomes", estilo: "Forró", tom: "Dm", capo: "não", visivel: true },
+            { titulo: "Araketu Bom Demais", artista: "Araketu", estilo: "Axé", tom: "A", capo: "não", visivel: true },
+            { titulo: "Arcoverde Meu", artista: "Luiz Gonzaga", estilo: "Forró", tom: "F", capo: "não", visivel: true },
+            { titulo: "ARERÊ", artista: "Ivete Sangalo", estilo: "Axé", tom: "A", capo: "não", visivel: true },
+            { titulo: "Arrea a Lenha", artista: "Marrom Brasileiro", estilo: "Frevo", tom: "Cm", capo: "não", visivel: true },
+            { titulo: "As Canções Que Você Fez Pra Mim", artista: "Roberto Carlos", estilo: "MPB", tom: "E", capo: "não", visivel: true },
+            { titulo: "AS CURVAS DA ESTRADA DE SANTOS", artista: "Roberto Carlos", estilo: "MPB", tom: "D", capo: "não", visivel: true },
+            { titulo: "AS ROSAS NÃO FALAM", artista: "Cartola", estilo: "MPB", tom: "Gm", capo: "não", visivel: true },
+            { titulo: "ASA BRANCA", artista: "Luiz Gonzaga", estilo: "Forró", tom: "E", capo: "não", visivel: true },
+            { titulo: "ASTRONAUTA DE MÁRMORE", artista: "Nenhum de Nós", estilo: "Rock", tom: "Gm", capo: "não", visivel: true },
+            { titulo: "Até mais ver", artista: "Waldonys", estilo: "Forró", tom: "G", capo: "não", visivel: true },
+            { titulo: "AVOHAI", artista: "Zé Ramalho", estilo: "MPB", tom: "D", capo: "não", visivel: true },
+            { titulo: "Baby Can I Hold You?", artista: "Tracy Chapman", estilo: "Internacional", tom: "D", capo: "não", visivel: true },
+            { titulo: "BAIANIDADE NAGÔ", artista: "Banda Mel", estilo: "Axé", tom: "E", capo: "não", visivel: true },
+            { titulo: "BALANÇA O SACO", artista: "Outro", estilo: "Outro", tom: "Gm", capo: "não", visivel: true },
+            { titulo: "BANDEIRA", artista: "Zeca Baleiro", estilo: "MPB", tom: "C", capo: "não", visivel: true },
+            { titulo: "BANDEIRA BRANCA", artista: "Outro", estilo: "Outro", tom: "Gm", capo: "não", visivel: true },
+            { titulo: "BEIJANDO A FLORA", artista: "Alceu Valença", estilo: "Outro", tom: "Gm", capo: "não", visivel: true },
+            { titulo: "Beleza Rara", artista: "Ivete Sangalo", estilo: "Axé", tom: "G", capo: "não", visivel: true },
+            { titulo: "BEM QUERER", artista: "Maurício Manieri", estilo: "MPB", tom: "A", capo: "não", visivel: true },
+            { titulo: "Bem-Te-Vi", artista: "Noda de Caju", estilo: "Forró", tom: "G", capo: "não", visivel: true },
+            { titulo: "BERIMBAU", artista: "Baden-Powell", estilo: "Bossa Nova", tom: "Dm", capo: "não", visivel: true },
+
+            // Bloco 5 (25 músicas)
+            { titulo: "BETE BALANÇO", artista: "Cazuza", estilo: "Rock", tom: "Em", capo: "não", visivel: true },
+            { titulo: "BICHO DE 7 CABEÇAS", artista: "Geraldo Azevedo", estilo: "MPB", tom: "Am", capo: "não", visivel: true },
+            { titulo: "BICHO MALUCO BELEZA", artista: "Alceu Valença", estilo: "Outro", tom: "A#", capo: "não", visivel: true },
+            { titulo: "BIJUTERIA", artista: "Bruno e Marrone", estilo: "Sertanejo", tom: "F#m", capo: "não", visivel: true },
+            { titulo: "BOATE AZUL", artista: "Bruno e Marrone", estilo: "Brega", tom: "Am", capo: "não", visivel: true },
+            { titulo: "BOM BOCADO", artista: "Art Popular", estilo: "Pagode", tom: "Gm", capo: "não", visivel: true },
+            { titulo: "Borboletas", artista: "Victor e Leo", estilo: "Sertanejo", tom: "Bm", capo: "não", visivel: true },
+            { titulo: "BOTA PRA FERVER", artista: "Asa de Águia", estilo: "Axé", tom: "Dm", capo: "não", visivel: true },
+            { titulo: "Briga Feia", artista: "Henrique e Juliano", estilo: "Sertanejo", tom: "A#", capo: "não", visivel: true },
+            { titulo: "BRIGAS", artista: "Altemar Dutra", estilo: "Bolero", tom: "F", capo: "não", visivel: true },
+            { titulo: "Brigas", artista: "Altemar Dutra", estilo: "Seresta", tom: "E", capo: "não", visivel: true },
+            { titulo: "Brigas Nunca Mais", artista: "Vinicius de Moraes", estilo: "Bossa Nova", tom: "A", capo: "não", visivel: true },
+            { titulo: "BRINCADEIRA DA TOMADA", artista: "É o Tchan", estilo: "Pagode", tom: "G", capo: "não", visivel: true },
+            { titulo: "Brincar de Amar", artista: "Cavalo de Pau", estilo: "Forró", tom: "Bm", capo: "não", visivel: true },
+            { titulo: "Bye Bye Tristeza", artista: "Sandra de Sá", estilo: "Rock", tom: "G", capo: "não", visivel: true },
+            { titulo: "CABECINHA NO OMBRO", artista: "Fagner", estilo: "MPB", tom: "E", capo: "não", visivel: true },
+            { titulo: "CABECINHA NO OMBRO", artista: "Almir Guineto", estilo: "Sertanejo", tom: "E", capo: "não", visivel: true },
+            { titulo: "Cabelos Brancos", artista: "Nelson Gonçalves", estilo: "Pagode", tom: "Am", capo: "não", visivel: true },
+            { titulo: "CABIDE", artista: "Ana Carolina", estilo: "MPB", tom: "D", capo: "não", visivel: true },
+            { titulo: "CABOCLO SONHADOR", artista: "Maciel Melo", estilo: "Forró", tom: "Am", capo: "não", visivel: true },
+            { titulo: "CACHAÇA", artista: "Outro", estilo: "Outro", tom: "D#", capo: "não", visivel: true },
+            { titulo: "Cada Volta é um Recomeço", artista: "Zezé Di Camargo e Luciano", estilo: "Sertanejo", tom: "A", capo: "não", visivel: true },
+            { titulo: "Cadê Você", artista: "Leandro e Leonardo", estilo: "Sertanejo", tom: "F", capo: "não", visivel: true },
+            { titulo: "CAMA E MESA", artista: "Roberto Carlos", estilo: "MPB", tom: "Gm", capo: "não", visivel: true },
+            { titulo: "CAMINHOS DE SOL", artista: "Zizi Possi", estilo: "MPB", tom: "G", capo: "não", visivel: true },
+
+            // Bloco 6 (25 músicas)
+            { titulo: "CAMPO MINADO", artista: "Jessé", estilo: "MPB", tom: "Fm", capo: "não", visivel: true },
+            { titulo: "CÂNDIDA", artista: "The Fevers", estilo: "Jovem Guarda", tom: "C", capo: "não", visivel: true },
+            { titulo: "CANTIGA AO REI", artista: "Outro", estilo: "Outro", tom: "D", capo: "não", visivel: true },
+            { titulo: "Cara caraba, sou camaleão", artista: "Chiclete Com Banana", estilo: "Axé", tom: "A", capo: "não", visivel: true },
+            { titulo: "Carla", artista: "LS Jack", estilo: "Rock", tom: "Bm", capo: "não", visivel: true },
+            { titulo: "CASO SÉRIO", artista: "Ed Motta", estilo: "MPB", tom: "Am", capo: "não", visivel: true },
+            { titulo: "CATEDRAL", artista: "Leandro e Leonardo", estilo: "Sertanejo", tom: "A", capo: "não", visivel: true },
+            { titulo: "CEROULA", artista: "Outro", estilo: "Outro", tom: "Gm", capo: "não", visivel: true },
+            { titulo: "CHALANA", artista: "Almir Sater", estilo: "Sertanejo", tom: "D", capo: "não", visivel: true },
+            { titulo: "Chão de Giz", artista: "Zé Ramalho", estilo: "MPB", tom: "G", capo: "não", visivel: true },
+            { titulo: "CHEGA DE SAUDADE", artista: "João Gilberto", estilo: "Bossa Nova", tom: "Dm", capo: "não", visivel: true },
+            { titulo: "Cheia de Chame", artista: "Guilherme Arantes", estilo: "Outro", tom: "C", capo: "não", visivel: true },
+            { titulo: "CHEIA DE MANIAS", artista: "Raça Negra", estilo: "Pagode", tom: "Gm", capo: "não", visivel: true },
+            { titulo: "CHHUVA DE HONESTIDADE", artista: "Outro", estilo: "Forró", tom: "D", capo: "não", visivel: true },
+            { titulo: "Chicleteiro Eu, Chicleteira Ela", artista: "Chiclete Com Banana", estilo: "Axé", tom: "Am", capo: "não", visivel: true },
+            { titulo: "Chopis Centis", artista: "Mamonas Assassinas", estilo: "Rock", tom: "Am", capo: "não", visivel: true },
+            { titulo: "Chora, Me Liga", artista: "João Bosco e Vinícius", estilo: "Sertanejo", tom: "A", capo: "não", visivel: true },
+            { titulo: "Chorando se foi", artista: "Kaoma", estilo: "Forró", tom: "G", capo: "não", visivel: true },
+            { titulo: "CHORAR PRA QUÊ?", artista: "Alcymar Monteiro", estilo: "Forró", tom: "Em", capo: "não", visivel: true },
+            { titulo: "CHUVA DE PRATA", artista: "Roupa Nova", estilo: "MPB", tom: "E", capo: "não", visivel: true },
+            { titulo: "CHUVA DE SOMBRINHAS", artista: "Outro", estilo: "Outro", tom: "Am", capo: "não", visivel: true },
+            { titulo: "CHUVAS DE VERÃO", artista: "José Augusto", estilo: "Sertanejo", tom: "A", capo: "não", visivel: true },
+            { titulo: "CIDADÃO", artista: "Zé Ramalho", estilo: "MPB", tom: "A", capo: "não", visivel: true },
+            { titulo: "CIGANA", artista: "Raça Negra", estilo: "Pagode", tom: "C", capo: "não", visivel: true },
+            { titulo: "CIGANO", artista: "Djavan", estilo: "MPB", tom: "C#m", capo: "não", visivel: true },
+
+            // Bloco 7 (25 músicas)
+            { titulo: "Cintura Fina", artista: "Luiz Gonzaga", estilo: "Forró", tom: "F", capo: "não", visivel: true },
+            { titulo: "CIÚME DE VOCÊ", artista: "Roberto Carlos", estilo: "MPB", tom: "A", capo: "não", visivel: true },
+            { titulo: "CIUMEIRA", artista: "Marilia Mendonça", estilo: "Sertanejo", tom: "F#m", capo: "não", visivel: true },
+            { titulo: "COBERTOR", artista: "Araketu", estilo: "Axé", tom: "C", capo: "não", visivel: true },
+            { titulo: "Coleção", artista: "Cassiano", estilo: "MPB", tom: "G", capo: "não", visivel: true },
+            { titulo: "COM OU SEM MIM", artista: "Gustavo Mioto", estilo: "Sertanejo", tom: "Gm", capo: "não", visivel: true },
+            { titulo: "COM QUE ROUPA", artista: "Noel Rosa", estilo: "Pagode", tom: "D", capo: "não", visivel: true },
+            { titulo: "COMO 2 E 2", artista: "Gal Costa", estilo: "MPB", tom: "G", capo: "não", visivel: true },
+            { titulo: "COMO DIZIA O MESTRE", artista: "Benito Di Paula", estilo: "Pagode", tom: "Dm", capo: "não", visivel: true },
+            { titulo: "COMO DOIS ANIMAIS", artista: "Alceu Valença", estilo: "Forró", tom: "E", capo: "não", visivel: true },
+            { titulo: "COMO É GRANDE O MEU AMOR", artista: "Roberto Carlos", estilo: "MPB", tom: "F", capo: "não", visivel: true },
+            { titulo: "COMO ÉS LINDO", artista: "Vida Reluz", estilo: "Gospel", tom: "D", capo: "não", visivel: true },
+            { titulo: "Como nossos pais", artista: "Belchior", estilo: "MPB", tom: "D", capo: "não", visivel: true },
+            { titulo: "Como Tudo Começou", artista: "Outro", estilo: "Forró", tom: "G", capo: "não", visivel: true },
+            { titulo: "Como um anjo", artista: "Limão Com Mel", estilo: "Forró", tom: "D", capo: "não", visivel: true },
+            { titulo: "Como um Anjo", artista: "César Menotti e Fabiano", estilo: "Sertanejo", tom: "D", capo: "não", visivel: true },
+            { titulo: "COMO VAI VOCÊ", artista: "Roberto Carlos", estilo: "MPB", tom: "G", capo: "não", visivel: true },
+            { titulo: "COMO VOVÓ JÁ DIZIA", artista: "Raul Seixas", estilo: "Rock", tom: "E", capo: "não", visivel: true },
+            { titulo: "COMO ZAQUEU", artista: "Regis Danese", estilo: "Gospel", tom: "G", capo: "não", visivel: true },
+            { titulo: "CONHEÇO UM CORAÇÃO", artista: "Eliana Ribeiro", estilo: "Gospel", tom: "D", capo: "não", visivel: true },
+            { titulo: "Conselho", artista: "Jorge Aragão", estilo: "Pagode", tom: "E", capo: "não", visivel: true },
+            { titulo: "CONTRA O TEMPO", artista: "Vander Lee", estilo: "MPB", tom: "G", capo: "não", visivel: true },
+            { titulo: "CONTRAMÃO", artista: "Gustavo Mioto", estilo: "Sertanejo", tom: "G", capo: "não", visivel: true },
+            { titulo: "CONVITE DE CASAMENTO", artista: "Rick e Renner", estilo: "Sertanejo", tom: "C", capo: "não", visivel: true },
+            { titulo: "Coração", artista: "Dorgival Dantas", estilo: "Forró", tom: "G", capo: "não", visivel: true },
+
+            // Bloco 8 (25 músicas)
+            { titulo: "Coração Bandido", artista: "Leonardo", estilo: "Sertanejo", tom: "C", capo: "não", visivel: true },
+            { titulo: "CORAÇÃO CACHORRO", artista: "Matheus Fernandes", estilo: "Sertanejo", tom: "D", capo: "não", visivel: true },
+            { titulo: "Coração Contrito", artista: "Flavinho", estilo: "Católica", tom: "D", capo: "não", visivel: true },
+            { titulo: "Coração de Papel", artista: "Sérgio Reis", estilo: "Brega", tom: "G", capo: "não", visivel: true },
+            { titulo: "Coração Partido (Corazón Partío)", artista: "Grupo Menos é Mais", estilo: "Pagode", tom: "F", capo: "não", visivel: true },
+            { titulo: "Coração Radiante", artista: "Revelação", estilo: "Pagode", tom: "C", capo: "não", visivel: true },
+            { titulo: "Crepúsculo da Canção", artista: "Outro", estilo: "MPB", tom: "G", capo: "não", visivel: true },
+            { titulo: "Crepúsculo Sertanejo", artista: "Luiz Gonzaga", estilo: "Forró", tom: "F", capo: "não", visivel: true },
+            { titulo: "CUIDA BEM DELA", artista: "Henrique e Juliano", estilo: "Sertanejo", tom: "Am", capo: "não", visivel: true },
+            { titulo: "CUIDA DE MIM", artista: "O Teatro Mágico", estilo: "MPB", tom: "B", capo: "não", visivel: true },
+            { titulo: "Dai-nos a Paz", artista: "Comunidade Católica Shalom", estilo: "Católica", tom: "A#", capo: "não", visivel: true },
+            { titulo: "Danado de Bom", artista: "Luiz Gonzaga", estilo: "Forró", tom: "C", capo: "não", visivel: true },
+            { titulo: "DANÇA DA SOLIDÃO", artista: "Marisa Monte", estilo: "MPB", tom: "Am", capo: "não", visivel: true },
+            { titulo: "Dança do Vampiro", artista: "Asa de Águia", estilo: "Axé", tom: "F#", capo: "não", visivel: true },
+            { titulo: "Daqui Só Se Leva o Amor", artista: "Jota Quest", estilo: "Rock", tom: "C", capo: "não", visivel: true },
+            { titulo: "De Igual pra Igual", artista: "Matogrosso e Mathias", estilo: "Sertanejo", tom: "F", capo: "não", visivel: true },
+            { titulo: "De Janeiro a janeiro", artista: "Roberta Campos", estilo: "MPB", tom: "C", capo: "não", visivel: true },
+            { titulo: "DE JANEIRO A JANEIRO", artista: "Roberta Campos", estilo: "MPB", tom: "A", capo: "não", visivel: true },
+            { titulo: "DE MAIS NINGUÉM", artista: "Marisa Monte", estilo: "MPB", tom: "Em", capo: "não", visivel: true },
+            { titulo: "De que Vale ter tudo na vida", artista: "José Augusto", estilo: "Sertanejo", tom: "Fm", capo: "não", visivel: true },
+            { titulo: "De Quem É a Culpa", artista: "Marilia Mendonça", estilo: "Sertanejo", tom: "D", capo: "não", visivel: true },
+            { titulo: "DE REPENTE, CALIFÓRNIA", artista: "Lulu Santos", estilo: "Rock", tom: "A", capo: "não", visivel: true },
+            { titulo: "De Tanto Amor", artista: "Roberto Carlos", estilo: "MPB", tom: "G", capo: "não", visivel: true },
+            { titulo: "DÊ UM GRITO AÍ", artista: "Chiclete Com Banana", estilo: "Axé", tom: "Em", capo: "não", visivel: true },
+            { titulo: "DE VOLTA PRO ACONCHEGO", artista: "Elba Ramalho", estilo: "MPB", tom: "G", capo: "não", visivel: true },
+
+            // Bloco 9 (25 músicas)
+            { titulo: "DE VOLTA PRO MEU ACONCHEGO", artista: "Nando Cordel", estilo: "Forró", tom: "C", capo: "não", visivel: true },
+            { titulo: "DEBAIXO DOS CARACÓIS DO SEUS CABELOS", artista: "Roberto Carlos", estilo: "MPB", tom: "A", capo: "não", visivel: true },
+            { titulo: "DECIDA", artista: "Milionário e José Rico", estilo: "Sertanejo", tom: "Dm", capo: "não", visivel: true },
+            { titulo: "DEIXA", artista: "Bruno e Marrone", estilo: "Sertanejo", tom: "F", capo: "não", visivel: true },
+            { titulo: "DEIXA A TANGA VOAR", artista: "Luiz Gonzaga", estilo: "Forró", tom: "F", capo: "não", visivel: true },
+            { titulo: "DEIXA A VIDA ME LEVAR", artista: "Zeca Pagodinho", estilo: "Pagode", tom: "D", capo: "não", visivel: true },
+            { titulo: "DEIXA DE BANCA", artista: "Reginaldo Rossi", estilo: "Brega", tom: "Em", capo: "não", visivel: true },
+            { titulo: "DEIXA EU TE AMAR", artista: "Agepê", estilo: "Pagode", tom: "Am", capo: "não", visivel: true },
+            { titulo: "Deixa tudo como tá", artista: "Thiaguinho", estilo: "Pagode", tom: "G", capo: "não", visivel: true },
+            { titulo: "DEPOIS", artista: "Marisa Monte", estilo: "MPB", tom: "E", capo: "não", visivel: true },
+            { titulo: "DEPOIS DO PRAZER", artista: "Só Pra Contrariar", estilo: "Pagode", tom: "A", capo: "não", visivel: true },
+            { titulo: "DEPOIS QUE VOCÊ MATAR MEU CORAÇÃO", artista: "Zezé Di Camargo e Luciano", estilo: "Sertanejo", tom: "F", capo: "não", visivel: true },
+            { titulo: "DESDE QUE O SAMBA É SAMBA", artista: "Caetano Veloso", estilo: "MPB", tom: "D", capo: "não", visivel: true },
+            { titulo: "Desilusão", artista: "Calcinha Preta", estilo: "Forró", tom: "F", capo: "não", visivel: true },
+            { titulo: "DESLIGA E VEM", artista: "Exaltasamba", estilo: "Pagode", tom: "A", capo: "não", visivel: true },
+            { titulo: "DESLIZES", artista: "Fagner", estilo: "MPB", tom: "A", capo: "não", visivel: true },
+            { titulo: "DESPEDIDA DE CASAL", artista: "Gustavo Mioto", estilo: "Sertanejo", tom: "A", capo: "não", visivel: true },
+            { titulo: "DETALHES", artista: "Roberto Carlos", estilo: "MPB", tom: "A", capo: "não", visivel: true },
+            { titulo: "Deus e Eu no Sertão", artista: "Victor e Leo", estilo: "Sertanejo", tom: "E", capo: "não", visivel: true },
+            { titulo: "DEUS ME LIVRE", artista: "Outro", estilo: "Pagode", tom: "A", capo: "não", visivel: true },
+            { titulo: "DEUS ME LIVRE", artista: "Outro", estilo: "Pagode", tom: "C", capo: "não", visivel: true },
+            { titulo: "DEUS ME PROTEJA", artista: "Chico César", estilo: "MPB", tom: "D", capo: "não", visivel: true },
+            { titulo: "DEUS ME PROTEJA - CIFRA", artista: "Chico César", estilo: "MPB", tom: "D", capo: "não", visivel: true },
+            { titulo: "DEVOLVA-ME", artista: "Outro", estilo: "MPB", tom: "Am", capo: "não", visivel: true },
+            { titulo: "DIA BRANCO", artista: "Geraldo Azevedo", estilo: "MPB", tom: "C", capo: "não", visivel: true },
+
+            // Bloco 10 (25 músicas)
+            { titulo: "DIABO LOIRO", artista: "Alceu Valença", estilo: "Outro", tom: "G", capo: "não", visivel: true },
+            { titulo: "DIANA", artista: "The Fevers", estilo: "Jovem Guarda", tom: "E", capo: "não", visivel: true },
+            { titulo: "Dias de Luta", artista: "Ira", estilo: "Rock", tom: "Am", capo: "não", visivel: true },
+            { titulo: "DIGA PRA MIM", artista: "Zezo", estilo: "Forró", tom: "G", capo: "não", visivel: true },
+            { titulo: "Diga que Valeu", artista: "Chiclete Com Banana", estilo: "Axé", tom: "C", capo: "não", visivel: true },
+            { titulo: "DIGA SIM PRA MIM", artista: "Desejo de Menina", estilo: "Forró", tom: "Cm", capo: "não", visivel: true },
+            { titulo: "DISPARADA", artista: "Geraldo Vandré", estilo: "MPB", tom: "C", capo: "não", visivel: true },
+            { titulo: "DISPARADA", artista: "Geraldo Vandré", estilo: "MPB", tom: "D", capo: "não", visivel: true },
+            { titulo: "DIVÃ", artista: "Roberto Carlos", estilo: "MPB", tom: "Dm", capo: "não", visivel: true },
+            { titulo: "Divino Coração", artista: "Comunidade Católica Shalom", estilo: "Católica", tom: "A#", capo: "não", visivel: true },
+            { titulo: "Divino Esposo", artista: "Comunidade Católica Shalom", estilo: "Católica", tom: "A", capo: "não", visivel: true },
+            { titulo: "DO JEITO QUE A VIDA QUER", artista: "Benito Di Paula", estilo: "Pagode", tom: "Dm", capo: "não", visivel: true },
+            { titulo: "DOIS", artista: "RPM", estilo: "MPB", tom: "G", capo: "não", visivel: true },
+            { titulo: "DOIS CORAÇÕES", artista: "Melim", estilo: "MPB", tom: "C", capo: "1ª casa", visivel: true },
+            { titulo: "DOIS CORAÇÕES E UMA HISTÓRIA", artista: "Zezé Di Camargo e Luciano", estilo: "Sertanejo", tom: "F", capo: "não", visivel: true },
+            { titulo: "DOMINGO", artista: "Só Pra Contrariar", estilo: "Pagode", tom: "G", capo: "não", visivel: true },
+            { titulo: "Domingo de Manhã", artista: "Marcos e Belutti", estilo: "Sertanejo", tom: "D", capo: "não", visivel: true },
+            { titulo: "DONA", artista: "Roupa Nova", estilo: "MPB", tom: "G", capo: "não", visivel: true },
+            { titulo: "É...", artista: "Gonzaguinha", estilo: "MPB", tom: "C", capo: "não", visivel: true },
+            { titulo: "É ISSO AÍ", artista: "Ana Carolina", estilo: "MPB", tom: "E", capo: "não", visivel: true },
+            { titulo: "É O AMOR", artista: "Zezé Di Camargo e Luciano", estilo: "Sertanejo", tom: "F", capo: "não", visivel: true },
+            { titulo: "É POR VOCÊ QUE CANTO", artista: "Leandro e Leonardo", estilo: "Sertanejo", tom: "Dm", capo: "não", visivel: true },
+            { titulo: "É por você que canto [c]", artista: "Leonardo", estilo: "Sertanejo", tom: "C", capo: "não", visivel: true },
+            { titulo: "É PRECISO SABER VIVER", artista: "Roberto Carlos", estilo: "MPB", tom: "D", capo: "não", visivel: true },
+            { titulo: "É proibido cochilar", artista: "Luiz Gonzaga", estilo: "Forró", tom: "G", capo: "não", visivel: true },
+
+            // Bloco 11 (25 músicas)
+            { titulo: "É TARDE DEMAIS", artista: "Raça Negra", estilo: "Pagode", tom: "E", capo: "não", visivel: true },
+            { titulo: "EDUARDO E MÔNICA", artista: "Legião Urbana", estilo: "Rock", tom: "E", capo: "não", visivel: true },
+            { titulo: "ELA É DEMAIS", artista: "Rick e Renner", estilo: "Sertanejo", tom: "E", capo: "não", visivel: true },
+            { titulo: "Ela Não Está Aqui", artista: "KLB", estilo: "MPB", tom: "C", capo: "não", visivel: true },
+            { titulo: "Em Busca da Minha Sorte", artista: "Thiaguinho", estilo: "Pagode", tom: "F#m", capo: "não", visivel: true },
+            { titulo: "Em Plena Lua de Mel", artista: "Reginaldo Rossi", estilo: "Brega", tom: "C", capo: "não", visivel: true },
+            { titulo: "EMOÇÕES", artista: "Roberto Carlos", estilo: "MPB", tom: "G#", capo: "não", visivel: true },
+            { titulo: "ENCONTRO DAS ÁGUAS", artista: "Jorge Vercillo", estilo: "MPB", tom: "D#", capo: "não", visivel: true },
+            { titulo: "Encosta N`eu", artista: "Dorgival Dantas", estilo: "Forró", tom: "A", capo: "não", visivel: true },
+            { titulo: "Encostar na Tua", artista: "Ana Carolina", estilo: "MPB", tom: "D", capo: "não", visivel: true },
+            { titulo: "ENQUANTO HOUVER SAUDADE", artista: "Alcione", estilo: "MPB", tom: "G#m", capo: "não", visivel: true },
+            { titulo: "ENTÃO É NATAL", artista: "Simone", estilo: "Gospel", tom: "E", capo: "não", visivel: true },
+            { titulo: "ENTRE A CRUZ E A ESPADA", artista: "Renato Russo", estilo: "MPB", tom: "D", capo: "não", visivel: true },
+            { titulo: "ENTRE A SERPENTE E A ESTRELA", artista: "Zé Ramalho", estilo: "MPB", tom: "C", capo: "não", visivel: true },
+            { titulo: "EPITÁFIO", artista: "Titãs", estilo: "Rock", tom: "G", capo: "não", visivel: true },
+            { titulo: "Erro Gostoso", artista: "Simone Mendes", estilo: "Sertanejo", tom: "C", capo: "não", visivel: true },
+            { titulo: "Escrito nas Estrelas", artista: "Tetê Espíndola", estilo: "MPB", tom: "G", capo: "não", visivel: true },
+            { titulo: "ESPANHOLA", artista: "Flávio Venturini", estilo: "MPB", tom: "D", capo: "não", visivel: true },
+            { titulo: "Espelho do Poder", artista: "Conde do Forró", estilo: "Brega", tom: "Em", capo: "não", visivel: true },
+            { titulo: "ESPELHOS D`ÁGUA", artista: "Dalto", estilo: "MPB", tom: "E", capo: "não", visivel: true },
+            { titulo: "ESPERANDO AVIÕES", artista: "Vander Lee", estilo: "MPB", tom: "F#m", capo: "não", visivel: true },
+            { titulo: "ESSA TAL LIBERDADE", artista: "Só Pra Contrariar", estilo: "Pagode", tom: "E", capo: "não", visivel: true },
+            { titulo: "ESTAR CONTIGO (TOM MULHER)", artista: "Walmir Alencar", estilo: "Gospel", tom: "D", capo: "não", visivel: true },
+            { titulo: "Estás Assentado", artista: "Eliana Ribeiro", estilo: "Católica", tom: "D", capo: "não", visivel: true },
+            { titulo: "ESTOU APAIXONADO", artista: "João Paulo e Daniel", estilo: "Sertanejo", tom: "A", capo: "não", visivel: true },
+
+            // Bloco 12 (25 músicas)
+            { titulo: "Estrela", artista: "Conde do Forró", estilo: "Brega", tom: "Am", capo: "não", visivel: true },
+            { titulo: "Estrelinha", artista: "Marilia Mendonça", estilo: "Sertanejo", tom: "D", capo: "não", visivel: true },
+            { titulo: "ESTRELINHA DO CÉU", artista: "Cavalo de Pau", estilo: "Forró", tom: "G", capo: "não", visivel: true },
+            { titulo: "ETERNAS ONDAS", artista: "Zé Ramalho", estilo: "MPB", tom: "Bm", capo: "não", visivel: true },
+            { titulo: "Eternos Amigos", artista: "Anjos de Resgate", estilo: "Gospel", tom: "G", capo: "não", visivel: true },
+            { titulo: "EU E VOCÊ SEMPRE", artista: "Exaltasamba", estilo: "Pagode", tom: "D", capo: "não", visivel: true },
+            { titulo: "Eu jurei não mais sofrer", artista: "Limão Com Mel", estilo: "Forró", tom: "C", capo: "não", visivel: true },
+            { titulo: "EU JURO", artista: "Leandro e Leonardo", estilo: "Sertanejo", tom: "C", capo: "não", visivel: true },
+            { titulo: "EU JURO", artista: "Noda de Caju", estilo: "Forró", tom: "Fm", capo: "não", visivel: true },
+            { titulo: "Eu Não Vou Embora", artista: "Tomate", estilo: "Axé", tom: "Dm", capo: "não", visivel: true },
+            { titulo: "EU NAVEGAREI", artista: "Padre Marcelo Rossi", estilo: "Gospel", tom: "Am", capo: "não", visivel: true },
+            { titulo: "EU POSSO VER", artista: "Outro", estilo: "Outro", tom: "E", capo: "não", visivel: true },
+            { titulo: "Eu Queria Dizer Que Te Amo Numa Canção", artista: "Fernando Mendes", estilo: "Seresta", tom: "D", capo: "não", visivel: true },
+            { titulo: "EU SEI", artista: "Legião Urbana", estilo: "Rock", tom: "D", capo: "não", visivel: true },
+            { titulo: "Eu sei", artista: "Papas da Língua", estilo: "MPB", tom: "G", capo: "não", visivel: true },
+            { titulo: "Eu Sei de Cor", artista: "Marilia Mendonça", estilo: "Sertanejo", tom: "E", capo: "não", visivel: true },
+            { titulo: "EU SEI QUE VOU TE AMAR", artista: "Tom Jobim", estilo: "Bossa Nova", tom: "D", capo: "não", visivel: true },
+            { titulo: "Eu Sou Desejo, Você é paixão", artista: "Leandro e Leonardo", estilo: "Sertanejo", tom: "A", capo: "não", visivel: true },
+            { titulo: "EU TE AMO", artista: "Roberto Carlos", estilo: "MPB", tom: "Am", capo: "não", visivel: true },
+            { titulo: "EVA", artista: "Ivete Sangalo", estilo: "Axé", tom: "D", capo: "não", visivel: true },
+            { titulo: "EVIDÊNCIAS", artista: "Chitãozinho e Xororó", estilo: "Sertanejo", tom: "C", capo: "não", visivel: true },
+            { titulo: "Ex Amor", artista: "Martinho da Vila", estilo: "Pagode", tom: "Em", capo: "não", visivel: true },
+            { titulo: "EXAGERADO", artista: "Cazuza", estilo: "Rock", tom: "G", capo: "não", visivel: true },
+            { titulo: "Faça Isso Não", artista: "Luiz Gonzaga", estilo: "Forró", tom: "D#", capo: "não", visivel: true },
+            { titulo: "FACAS", artista: "Bruno e Marrone", estilo: "Sertanejo", tom: "C", capo: "não", visivel: true },
+
+            // Bloco 13 (25 músicas)
+            { titulo: "FÁCIL", artista: "Jota Quest", estilo: "Rock", tom: "G", capo: "não", visivel: true },
+            { titulo: "FALSA CONSIDERAÇÃO", artista: "Jorge Aragão", estilo: "Pagode", tom: "D", capo: "não", visivel: true },
+            { titulo: "Faltando um Pedaço", artista: "Djavan", estilo: "MPB", tom: "E", capo: "não", visivel: true },
+            { titulo: "FANATISMO", artista: "Fagner", estilo: "MPB", tom: "Em", capo: "não", visivel: true },
+            { titulo: "Fantasias", artista: "José Augusto", estilo: "Sertanejo", tom: "F", capo: "não", visivel: true },
+            { titulo: "FANTASIAS", artista: "Leonardo", estilo: "Sertanejo", tom: "F", capo: "não", visivel: true },
+            { titulo: "FAZ PARTE DO MEU SHOW", artista: "Cazuza", estilo: "MPB", tom: "B", capo: "não", visivel: true },
+            { titulo: "Faz Uma Loucura por Mim", artista: "Alcione", estilo: "Pagode", tom: "Am", capo: "não", visivel: true },
+            { titulo: "Fica Comigo", artista: "Placa Luminosa", estilo: "MPB", tom: "A", capo: "não", visivel: true },
+            { titulo: "FICO ASSIM SEM VOCÊ", artista: "Adriana Calcanhotto", estilo: "MPB", tom: "E", capo: "não", visivel: true },
+            { titulo: "FILME TRISTE", artista: "Outro", estilo: "MPB", tom: "A", capo: "não", visivel: true },
+            { titulo: "FILOSOFIA", artista: "Noel Rosa", estilo: "Pagode", tom: "Dm", capo: "não", visivel: true },
+            { titulo: "Final Feliz", artista: "Jorge Vercillo", estilo: "MPB", tom: "C", capo: "não", visivel: true },
+            { titulo: "FIO DE CABELO", artista: "Chitãozinho e Xororó", estilo: "Sertanejo", tom: "D", capo: "não", visivel: true },
+            { titulo: "FIRMAMENTO", artista: "Cidade Negra", estilo: "Reggae", tom: "F", capo: "não", visivel: true },
+            { titulo: "FLOR E O BEIJA-FLOR", artista: "Henrique e Juliano", estilo: "Sertanejo", tom: "C", capo: "não", visivel: true },
+            { titulo: "FOGO E PAIXÃO", artista: "Wando", estilo: "Brega", tom: "C", capo: "não", visivel: true },
+            { titulo: "FOI ASSIM", artista: "Wanderlea", estilo: "MPB", tom: "E", capo: "não", visivel: true },
+            { titulo: "Foi Deus Quem Fez Você", artista: "Amelinha", estilo: "MPB", tom: "E", capo: "não", visivel: true },
+            { titulo: "Folha Seca", artista: "Amado Batista", estilo: "Sertanejo", tom: "E", capo: "não", visivel: true },
+            { titulo: "FORÇA ESTRANHA", artista: "Caetano Veloso", estilo: "MPB", tom: "C", capo: "não", visivel: true },
+            { titulo: "FORRÓ DO POEIRÃO", artista: "Luiz Gonzaga", estilo: "Forró", tom: "Em", capo: "não", visivel: true },
+            { titulo: "Forró Pesado", artista: "Luiz Gonzaga", estilo: "Forró", tom: "F", capo: "não", visivel: true },
+            { titulo: "Forrobodó", artista: "Mastruz com Leite", estilo: "Forró", tom: "G", capo: "não", visivel: true },
+            { titulo: "FOTOGRAFIA", artista: "Leoni", estilo: "MPB", tom: "B", capo: "não", visivel: true },
+
+            // Bloco 14 (25 músicas)
+            { titulo: "FRISSON", artista: "Elba Ramalho", estilo: "MPB", tom: "G", capo: "não", visivel: true },
+            { titulo: "Frisson", artista: "Tunai", estilo: "MPB", tom: "B", capo: "não", visivel: true },
+            { titulo: "Fruto Especial", artista: "Bruno e Marrone", estilo: "Sertanejo", tom: "D", capo: "não", visivel: true },
+            { titulo: "FUI EU", artista: "José Augusto", estilo: "MPB", tom: "C", capo: "não", visivel: true },
+            { titulo: "FUTURO PROMETIDO", artista: "Sorriso Maroto", estilo: "Pagode", tom: "G", capo: "não", visivel: true },
+            { titulo: "GALERA DO BRASIL", artista: "Outro", estilo: "Outro", tom: "Dm", capo: "não", visivel: true },
+            { titulo: "GAMEI", artista: "Exaltasamba", estilo: "Pagode", tom: "Bm", capo: "não", visivel: true },
+            { titulo: "GARÇOM", artista: "Reginaldo Rossi", estilo: "Brega", tom: "Dm", capo: "não", visivel: true },
+            { titulo: "GARGANTA", artista: "Ana Carolina", estilo: "MPB", tom: "Em", capo: "não", visivel: true },
+            { titulo: "GAROTA DE IPANEMA", artista: "Tom Jobim", estilo: "Bossa Nova", tom: "F", capo: "não", visivel: true },
+            { titulo: "GAROTO DE ALUGUEL", artista: "Zé Ramalho", estilo: "MPB", tom: "Am", capo: "não", visivel: true },
+            { titulo: "GEMEDEIRA", artista: "Elba Ramalho", estilo: "Forró", tom: "Fm", capo: "não", visivel: true },
+            { titulo: "GENI E O ZEPELIM", artista: "Chico Buarque", estilo: "MPB", tom: "Cm", capo: "não", visivel: true },
+            { titulo: "GENTE HUMILDE", artista: "Chico Buarque", estilo: "MPB", tom: "F", capo: "não", visivel: true },
+            { titulo: "GITA", artista: "Raul Seixas", estilo: "Rock", tom: "E", capo: "não", visivel: true },
+            { titulo: "GLÓRIA", artista: "Outro", estilo: "Gospel", tom: "D", capo: "não", visivel: true },
+            { titulo: "Glória a Deus Nas Alturas(Na Dança da Vida)", artista: "Comunidade Católica Shalom", estilo: "Católica", tom: "D", capo: "não", visivel: true },
+            { titulo: "GUERREIRO MENINO (UM HOMEM TAMBÉM CHORA)", artista: "Fagner", estilo: "MPB", tom: "Em", capo: "não", visivel: true },
+            { titulo: "Have You Ever Seen The Rain", artista: "Creedence Clearwater Revival", estilo: "Internacional", tom: "C", capo: "não", visivel: true },
+            { titulo: "HEY JUDE", artista: "The Beatles", estilo: "Internacional", tom: "F", capo: "não", visivel: true },
+            { titulo: "HIno do Galo da Madrugada", artista: "Alceu Valença", estilo: "Outro", tom: "A#", capo: "não", visivel: true },
+            { titulo: "I HAVE TO GO NOW", artista: "Jammil e Uma Noites", estilo: "Axé", tom: "Gm", capo: "não", visivel: true },
+            { titulo: "If You Leave Me Now", artista: "Chicago", estilo: "Internacional", tom: "A", capo: "não", visivel: true },
+            { titulo: "IMPOSSÍVEL ACREDITAR", artista: "Fábio Jr", estilo: "MPB", tom: "C", capo: "não", visivel: true },
+            { titulo: "IMPRESSIONANDO OS ANJOS", artista: "Gustavo Mioto", estilo: "Sertanejo", tom: "F#m", capo: "não", visivel: true },
+
+            // Bloco 15 (25 músicas)
+            { titulo: "INDEFESO", artista: "Banda Magníficos", estilo: "Forró", tom: "F#", capo: "não", visivel: true },
+            { titulo: "ÍNDIA", artista: "Roberto Carlos", estilo: "MPB", tom: "Dm", capo: "não", visivel: true },
+            { titulo: "INDIFERENÇA", artista: "Zezé Di Camargo e Luciano", estilo: "Sertanejo", tom: "C", capo: "não", visivel: true },
+            { titulo: "Infiel", artista: "Marilia Mendonça", estilo: "Sertanejo", tom: "Em", capo: "não", visivel: true },
+            { titulo: "INSEGURANÇA", artista: "Grupo Pixote", estilo: "Pagode", tom: "A#", capo: "não", visivel: true },
+            { titulo: "IOLANDA", artista: "Chico Buarque", estilo: "MPB", tom: "D", capo: "não", visivel: true },
+            { titulo: "Isso Aqui Tá Bom Demais - Dominguinhos [c]", artista: "Dominguinhos", estilo: "Forró", tom: "E", capo: "não", visivel: true },
+            { titulo: "Jardim dos Animais (Paraíso)", artista: "Fagner", estilo: "Forró", tom: "A", capo: "não", visivel: true },
+            { titulo: "JOÃO DE BARRO", artista: "Maria Gadú", estilo: "MPB", tom: "C#m", capo: "não", visivel: true },
+            { titulo: "JOÃO E MARIA", artista: "Chico Buarque", estilo: "MPB", tom: "Am", capo: "não", visivel: true },
+            { titulo: "JOGA FORA", artista: "Sandra de Sá", estilo: "Soul", tom: "Bm", capo: "não", visivel: true },
+            { titulo: "JOGADO NA RUA", artista: "Banda Magníficos", estilo: "Forró", tom: "F", capo: "não", visivel: true },
+            { titulo: "JURAMENTO DO DEDINHO", artista: "Mano Walter", estilo: "Forró", tom: "D", capo: "não", visivel: true },
+            { titulo: "JUVENTUDE DOURADA", artista: "Outro", estilo: "Outro", tom: "A#", capo: "não", visivel: true },
+            { titulo: "KELLY", artista: "Labaredas", estilo: "Brega", tom: "E", capo: "não", visivel: true },
+            { titulo: "KRYPTÔNIA", artista: "Zé Ramalho", estilo: "MPB", tom: "D", capo: "não", visivel: true },
+            { titulo: "La barca", artista: "Luis Miguel", estilo: "Internacional", tom: "D", capo: "não", visivel: true },
+            { titulo: "LA BELLA LUNA", artista: "Os Paralamas do Sucesso", estilo: "Rock", tom: "E", capo: "não", visivel: true },
+            { titulo: "LÁGRIMAS E CHUVA", artista: "Kid Abelha", estilo: "Rock", tom: "Bm", capo: "não", visivel: true },
+            { titulo: "Lama", artista: "Núbia Lafayette", estilo: "Seresta", tom: "Cm", capo: "não", visivel: true },
+            { titulo: "LAMBADA DE SERPENTE", artista: "Djavan", estilo: "MPB", tom: "E", capo: "não", visivel: true },
+            { titulo: "Lamento Sertanejo", artista: "Dominguinhos", estilo: "Forró", tom: "Dm", capo: "não", visivel: true },
+            { titulo: "Lamour", artista: "Pablo", estilo: "Brega", tom: "D", capo: "não", visivel: true },
+            { titulo: "LANCE INDIVIDUAL", artista: "Jorge e Mateus", estilo: "Sertanejo", tom: "F", capo: "não", visivel: true },
+            { titulo: "LANTERNA DOS AFOGADOS", artista: "Os Paralamas do Sucesso", estilo: "Rock", tom: "A", capo: "não", visivel: true },
+
+            // Bloco 16 (25 músicas)
+            { titulo: "LÁPIS DE COR", artista: "Flávio José", estilo: "Forró", tom: "Am", capo: "não", visivel: true },
+            { titulo: "Largado às Traças", artista: "Zé Neto e Cristiano", estilo: "Sertanejo", tom: "B", capo: "não", visivel: true },
+            { titulo: "LEMBRA DE MIM", artista: "Ivan Lins", estilo: "MPB", tom: "E", capo: "não", visivel: true },
+            { titulo: "Lembrei de Nós", artista: "João Gomes", estilo: "Forró", tom: "E", capo: "não", visivel: true },
+            { titulo: "LET IT BE", artista: "The Beatles", estilo: "Internacional", tom: "C", capo: "não", visivel: true },
+            { titulo: "LETÍCIA", artista: "Outro", estilo: "Sertanejo", tom: "Bm", capo: "não", visivel: true },
+            { titulo: "LEVA", artista: "Só Pra Contrariar", estilo: "Pagode", tom: "G", capo: "não", visivel: true },
+            { titulo: "LEVIANA", artista: "Reginaldo Rossi", estilo: "Brega", tom: "F#m", capo: "não", visivel: true },
+            { titulo: "LIGAÇÃO URBANA", artista: "Bruno e Marrone", estilo: "Sertanejo", tom: "A", capo: "não", visivel: true },
+            { titulo: "Linda Demais", artista: "Roupa Nova", estilo: "MPB", tom: "B", capo: "não", visivel: true },
+            { titulo: "LINDOS MOMENTOS", artista: "Noda de Caju", estilo: "Forró", tom: "C", capo: "não", visivel: true },
+            { titulo: "Linha do Equador", artista: "Djavan", estilo: "MPB", tom: "E", capo: "não", visivel: true },
+            { titulo: "LOCUTOR", artista: "Calcinha Preta", estilo: "Forró", tom: "E", capo: "não", visivel: true },
+            { titulo: "LONGE", artista: "Outro", estilo: "Outro", tom: "E", capo: "não", visivel: true },
+            { titulo: "Longe de Você", artista: "Limão Com Mel", estilo: "Forró", tom: "D", capo: "não", visivel: true },
+            { titulo: "Louca de Saudade", artista: "Jorge e Mateus", estilo: "Sertanejo", tom: "C", capo: "não", visivel: true },
+            { titulo: "LOVE OF MY LIFE", artista: "Queen", estilo: "Internacional", tom: "A", capo: "não", visivel: true },
+            { titulo: "Lover Why", artista: "Outro", estilo: "Internacional", tom: "Cm", capo: "não", visivel: true },
+            { titulo: "Lucidez", artista: "Jorge Aragão", estilo: "Pagode", tom: "E", capo: "não", visivel: true },
+            { titulo: "LUCKY", artista: "Jason Mraz", estilo: "Internacional", tom: "C", capo: "não", visivel: true },
+            { titulo: "LUZ DOS OLHOS", artista: "Nando Reis", estilo: "Rock", tom: "Am", capo: "não", visivel: true },
+            { titulo: "MADALENA", artista: "Gilberto Gil", estilo: "Forró", tom: "D", capo: "não", visivel: true },
+            { titulo: "Madalena do Jucu", artista: "Martinho da Vila", estilo: "Pagode", tom: "G", capo: "não", visivel: true },
+            { titulo: "MADEIRA QUE CUPIM NÃO RÓI", artista: "Outro", estilo: "Outro", tom: "Gm", capo: "não", visivel: true },
+            { titulo: "Madri", artista: "Fernando e Sorocaba", estilo: "Sertanejo", tom: "G", capo: "não", visivel: true },
+
+            // Bloco 17 (25 músicas)
+            { titulo: "Mãe", artista: "Rick e Renner", estilo: "Sertanejo", tom: "A", capo: "não", visivel: true },
+            { titulo: "Mãe, um pedaço de céu", artista: "Outro", estilo: "MPB", tom: "E", capo: "não", visivel: true },
+            { titulo: "MAIOR ABANDONADO", artista: "Cazuza", estilo: "Rock", tom: "E", capo: "não", visivel: true },
+            { titulo: "MAIS UMA VEZ", artista: "Renato Russo", estilo: "MPB", tom: "A", capo: "não", visivel: true },
+            { titulo: "MAL ACOSTUMADO", artista: "Araketu", estilo: "Axé", tom: "Bm", capo: "não", visivel: true },
+            { titulo: "MAL DE MIM", artista: "Djavan", estilo: "MPB", tom: "Am", capo: "não", visivel: true },
+            { titulo: "Mala de Saudade", artista: "Outro", estilo: "Forró", tom: "Gm", capo: "não", visivel: true },
+            { titulo: "MALANDRAGEM", artista: "Cássia Eller", estilo: "MPB", tom: "Bm", capo: "não", visivel: true },
+            { titulo: "Malandrinha", artista: "Edson Gomes", estilo: "Reggae", tom: "Bm", capo: "não", visivel: true },
+            { titulo: "MALANDRO", artista: "Jorge Aragão", estilo: "Pagode", tom: "D", capo: "não", visivel: true },
+            { titulo: "Maluco Beleza", artista: "Raul Seixas", estilo: "MPB", tom: "C", capo: "não", visivel: true },
+            { titulo: "MAMA ÁFRICA", artista: "Outro", estilo: "MPB", tom: "Am", capo: "não", visivel: true },
+            { titulo: "MAMÃE EU QUERO", artista: "Carmen Miranda", estilo: "Outro", tom: "D#", capo: "não", visivel: true },
+            { titulo: "MANIVELA", artista: "Asa de Águia", estilo: "Axé", tom: "E", capo: "não", visivel: true },
+            { titulo: "Mar de Emoções (bambolê)", artista: "Beto Barbosa", estilo: "Forró", tom: "G", capo: "não", visivel: true },
+            { titulo: "Mar de Saudade", artista: "Outro", estilo: "Forró", tom: "Gm", capo: "não", visivel: true },
+            { titulo: "Maranathá", artista: "Eliana Ribeiro", estilo: "Católica", tom: "E", capo: "não", visivel: true },
+            { titulo: "MARCHA DE NÚPCIAS", artista: "Zé Neto e Cristiano", estilo: "Sertanejo", tom: "C", capo: "não", visivel: true },
+            { titulo: "Margarida Perfumada", artista: "Timbalada", estilo: "Axé", tom: "Em", capo: "não", visivel: true },
+            { titulo: "MARINA", artista: "Dorival Caymmi", estilo: "MPB", tom: "A", capo: "não", visivel: true },
+            { titulo: "Marvin", artista: "Titãs", estilo: "Rock", tom: "A", capo: "não", visivel: true },
+            { titulo: "MÁSCARA NEGRA", artista: "Zé Keti", estilo: "Outro", tom: "A#", capo: "não", visivel: true },
+            { titulo: "ME APAIXONEI PELA PESSOA ERRADA", artista: "Exaltasamba", estilo: "Pagode", tom: "D", capo: "não", visivel: true },
+            { titulo: "Me dá um beijo", artista: "Dorgival Dantas", estilo: "Forró", tom: "A", capo: "não", visivel: true },
+            { titulo: "ME DÊ MOTIVO", artista: "Tim Maia", estilo: "Soul", tom: "Am", capo: "não", visivel: true },
+
+            // Bloco 18 (25 músicas)
+            { titulo: "ME LEVA JUNTO COM VOCÊ", artista: "Raça Negra", estilo: "Pagode", tom: "C", capo: "não", visivel: true },
+            { titulo: "Me Leva pra Casa", artista: "Zezé Di Camargo e Luciano", estilo: "Sertanejo", tom: "G", capo: "não", visivel: true },
+            { titulo: "ME SEGURA SE NÃO EU CAIO", artista: "Alceu Valença", estilo: "Outro", tom: "D#", capo: "não", visivel: true },
+            { titulo: "MEDO DA CHUVA", artista: "Raul Seixas", estilo: "MPB", tom: "D", capo: "não", visivel: true },
+            { titulo: "Mega Sena", artista: "Pablo", estilo: "Brega", tom: "C", capo: "não", visivel: true },
+            { titulo: "MEIGA SENHORITA", artista: "Almir Sater", estilo: "Sertanejo", tom: "D", capo: "não", visivel: true },
+            { titulo: "MENINA DO LIDO", artista: "Geraldo Azevedo", estilo: "MPB", tom: "E", capo: "não", visivel: true },
+            { titulo: "MENINA VENENO", artista: "Zezé Di Camargo e Luciano", estilo: "Sertanejo", tom: "D", capo: "não", visivel: true },
+            { titulo: "MENINA VENENO", artista: "Ritchie", estilo: "Rock", tom: "D", capo: "não", visivel: true },
+            { titulo: "MENTES TÃO BEM", artista: "Zezé Di Camargo e Luciano", estilo: "Sertanejo", tom: "G", capo: "não", visivel: true },
+            { titulo: "MENTIRAS", artista: "Adriana Calcanhotto", estilo: "MPB", tom: "E", capo: "não", visivel: true },
+            { titulo: "Meu Amor Não Vá Embora", artista: "Beto Barbosa", estilo: "MPB", tom: "Em", capo: "não", visivel: true },
+            { titulo: "MEU CABELO DURO É ASSIM", artista: "Chiclete Com Banana", estilo: "Axé", tom: "B", capo: "não", visivel: true },
+            { titulo: "MEU CALOR", artista: "Outro", estilo: "Outro", tom: "E", capo: "não", visivel: true },
+            { titulo: "Meu Calor", artista: "Outro", estilo: "Forró", tom: "E", capo: "não", visivel: true },
+            { titulo: "Meu Disfarce", artista: "Bruno e Marrone", estilo: "Sertanejo", tom: "Fm", capo: "não", visivel: true },
+            { titulo: "Meu Ébano", artista: "Alcione", estilo: "Pagode", tom: "Em", capo: "não", visivel: true },
+            { titulo: "MEU JEITO DE SER", artista: "Só Pra Contrariar", estilo: "Pagode", tom: "E", capo: "não", visivel: true },
+            { titulo: "MEU MEL", artista: "Markinhos Moura", estilo: "MPB", tom: "B", capo: "não", visivel: true },
+            { titulo: "MEU MUNDO E NADA MAIS", artista: "Guilherme Arantes", estilo: "MPB", tom: "E", capo: "não", visivel: true },
+            { titulo: "Meu Tesão é Você", artista: "Banda Magníficos", estilo: "Forró", tom: "G", capo: "não", visivel: true },
+            { titulo: "MEU VAQUEIRO, MEU PEÃO", artista: "Mastruz com Leite", estilo: "Forró", tom: "Gm", capo: "não", visivel: true },
+            { titulo: "MEUS TEMPOS DE CRIANÇA", artista: "Ataulfo Alves", estilo: "Samba Rock", tom: "Bm", capo: "não", visivel: true },
+            { titulo: "MILA", artista: "Netinho", estilo: "Axé", tom: "D", capo: "não", visivel: true },
+            { titulo: "Minha Delizadeza", artista: "Outro", estilo: "Forró", tom: "Am", capo: "não", visivel: true },
+
+            // Bloco 19 (25 músicas)
+            { titulo: "MINHA ESTRANHA LOUCURA", artista: "Alcione", estilo: "MPB", tom: "D", capo: "não", visivel: true },
+            { titulo: "Minha Mãe, Minha Heroína", artista: "Lindomar Castilho", estilo: "MPB", tom: "D", capo: "não", visivel: true },
+            { titulo: "Minha Metade", artista: "Só Pra Contrariar", estilo: "Pagode", tom: "C", capo: "não", visivel: true },
+            { titulo: "MISTÉRIOS DA MEIA NOITE", artista: "Zé Ramalho", estilo: "MPB", tom: "D", capo: "não", visivel: true },
+            { titulo: "MOÇA BONITA", artista: "Geraldo Azevedo", estilo: "Forró", tom: "D", capo: "não", visivel: true },
+            { titulo: "Monalisa", artista: "Jorge Vercillo", estilo: "MPB", tom: "A", capo: "não", visivel: true },
+            { titulo: "MORANGO DO NORDESTE", artista: "Lairton", estilo: "Sertanejo", tom: "E", capo: "não", visivel: true },
+            { titulo: "Mordida de Amor", artista: "Yahoo", estilo: "Rock", tom: "Bm", capo: "não", visivel: true },
+            { titulo: "MUDANDO DE ASSUSTO", artista: "Henrique e Juliano", estilo: "Sertanejo", tom: "E", capo: "não", visivel: true },
+            { titulo: "MUITO ESTRANHO", artista: "Nando Reis", estilo: "MPB", tom: "D", capo: "não", visivel: true },
+            { titulo: "Muito Romântico", artista: "Outro", estilo: "MPB", tom: "E", capo: "não", visivel: true },
+            { titulo: "MULHER DE 40", artista: "Roberto Carlos", estilo: "MPB", tom: "D", capo: "não", visivel: true },
+            { titulo: "MULHER NOVA, BONITA E CARINHOSA", artista: "Zé Ramalho", estilo: "MPB", tom: "E", capo: "não", visivel: true },
+            { titulo: "Música Urbana", artista: "Capital Inicial", estilo: "Rock", tom: "Fm", capo: "não", visivel: true },
+            { titulo: "N.", artista: "Nando Reis", estilo: "MPB", tom: "D", capo: "não", visivel: true },
+            { titulo: "NA BOQUINHA DA GARRAFA", artista: "É o Tchan", estilo: "Pagode", tom: "F", capo: "não", visivel: true },
+            { titulo: "NA CONTA DA LOUCURA", artista: "Bruno e Marrone", estilo: "Sertanejo", tom: "Bm", capo: "não", visivel: true },
+            { titulo: "NA PAZ DO SEU SORRISO", artista: "Roberto Carlos", estilo: "MPB", tom: "F#m", capo: "não", visivel: true },
+            { titulo: "Na Ponta do Pé", artista: "Mastruz com Leite", estilo: "Forró", tom: "G", capo: "não", visivel: true },
+            { titulo: "NADA APAGA ESSA PAIXÃO", artista: "Outro", estilo: "MPB", tom: "C", capo: "não", visivel: true },
+            { titulo: "NADA POR MIM", artista: "Kid Abelha", estilo: "MPB", tom: "F", capo: "não", visivel: true },
+            { titulo: "NÃO APRENDI DIZER ADEUS", artista: "Leandro e Leonardo", estilo: "Sertanejo", tom: "E", capo: "não", visivel: true },
+            { titulo: "NÃO CHORE MAIS", artista: "Gilberto Gil", estilo: "MPB", tom: "A", capo: "não", visivel: true },
+            { titulo: "Não deixe o samba morrer", artista: "Alcione", estilo: "Pagode", tom: "Em", capo: "não", visivel: true },
+            { titulo: "Não Devo Nada a Ninguém", artista: "Conde do Forró", estilo: "Brega", tom: "Em", capo: "não", visivel: true },
+
+            // Bloco 20 (25 músicas)
+            { titulo: "NÃO PRECISA MUDAR", artista: "Ivete Sangalo", estilo: "MPB", tom: "G", capo: "não", visivel: true },
+            { titulo: "Não Sou Vaqueiro", artista: "Brasas do Forró", estilo: "Forró", tom: "G", capo: "não", visivel: true },
+            { titulo: "NÃO TENTE ME IMPEDIR", artista: "Bruno e Marrone", estilo: "Sertanejo", tom: "F#m", capo: "não", visivel: true },
+            { titulo: "Não Vou Chorar", artista: "Chiclete Com Banana", estilo: "Axé", tom: "C", capo: "não", visivel: true },
+            { titulo: "Naquela Mesa", artista: "Nelson Gonçalves", estilo: "Pagode", tom: "Am", capo: "não", visivel: true },
+            { titulo: "NEGRO GATO", artista: "Roberto Carlos", estilo: "Jovem Guarda", tom: "Dm", capo: "não", visivel: true },
+            { titulo: "Negue", artista: "Nelson Gonçalves", estilo: "Seresta", tom: "Cm", capo: "não", visivel: true },
+            { titulo: "Nem Morta", artista: "Alcione", estilo: "MPB", tom: "G", capo: "não", visivel: true },
+            { titulo: "NEM OLHOU PRA MIM", artista: "Alcymar Monteiro", estilo: "Forró", tom: "C", capo: "não", visivel: true },
+            { titulo: "NEM UM DIA", artista: "Djavan", estilo: "MPB", tom: "Dm", capo: "não", visivel: true },
+            { titulo: "NINGUEM TE AMA COMO EU", artista: "Vida Reluz", estilo: "Gospel", tom: "G", capo: "não", visivel: true },
+            { titulo: "NODA DE CAJÚ", artista: "Mastruz com Leite", estilo: "Forró", tom: "F", capo: "não", visivel: true },
+            { titulo: "Noite do Prazer", artista: "Claudio Zoli", estilo: "Rock", tom: "F#m", capo: "não", visivel: true },
+            { titulo: "NOITE FELIZ", artista: "Outro", estilo: "Gospel", tom: "A#", capo: "não", visivel: true },
+            { titulo: "NOITES TRAIÇOEIRAS", artista: "Padre Marcelo Rossi", estilo: "Gospel", tom: "E", capo: "não", visivel: true },
+            { titulo: "NOSSA CANÇÃO", artista: "Roberto Carlos", estilo: "MPB", tom: "A", capo: "não", visivel: true },
+            { titulo: "Nossa Oferta de Amor", artista: "Comunidade Católica Shalom", estilo: "Católica", tom: "D", capo: "não", visivel: true },
+            { titulo: "Nossa Senhora", artista: "Roberto Carlos", estilo: "Gospel", tom: "C", capo: "não", visivel: true },
+            { titulo: "NOSSO SONHO NÃO É ILUSÃO", artista: "Só Pra Contrariar", estilo: "Pagode", tom: "E", capo: "não", visivel: true },
+            { titulo: "Nova York", artista: "Chrystian e Ralf", estilo: "Sertanejo", tom: "A", capo: "não", visivel: true },
+            { titulo: "Nuvem de Lágrimas", artista: "Chitãozinho e Xororó", estilo: "Sertanejo", tom: "B", capo: "não", visivel: true },
+            { titulo: "O BARQUINHO", artista: "Roberto Menescal", estilo: "Bossa Nova", tom: "F", capo: "não", visivel: true },
+            { titulo: "O BÊBADO E O EQUILIBRISTA", artista: "João Bosco", estilo: "Pagode", tom: "G", capo: "não", visivel: true },
+            { titulo: "O Bêbado e o Equilibrista", artista: "João Bosco", estilo: "Samba", tom: "A", capo: "não", visivel: true },
+            { titulo: "O CALHAMBEQUE", artista: "Roberto Carlos", estilo: "Jovem Guarda", tom: "F#", capo: "não", visivel: true },
+
+            // Bloco 21 (25 músicas)
+            { titulo: "O CÉU EXPLICA TUDO", artista: "Henrique e Juliano", estilo: "Sertanejo", tom: "C#", capo: "não", visivel: true },
+            { titulo: "O MUNDO", artista: "Paulinho Moska", estilo: "MPB", tom: "Am", capo: "não", visivel: true },
+            { titulo: "O MUNDO É UM MOINHO", artista: "Cartola", estilo: "MPB", tom: "Bm", capo: "não", visivel: true },
+            { titulo: "O Neném", artista: "Trio Nordestino", estilo: "Forró", tom: "D", capo: "não", visivel: true },
+            { titulo: "O PAPA É POP", artista: "Engenheiros do Hawaii", estilo: "Rock", tom: "G", capo: "não", visivel: true },
+            { titulo: "O PORTÃO", artista: "Roberto Carlos", estilo: "MPB", tom: "F", capo: "não", visivel: true },
+            { titulo: "O QUE É O QUE É", artista: "Gonzaguinha", estilo: "Pagode", tom: "Cm", capo: "não", visivel: true },
+            { titulo: "O QUE É QUE HÁ?", artista: "Fábio Jr", estilo: "MPB", tom: "G", capo: "não", visivel: true },
+            { titulo: "O Sol", artista: "Vitor Kley", estilo: "Rock", tom: "F#m", capo: "não", visivel: true },
+            { titulo: "O SOL NASCERÁ", artista: "Cartola", estilo: "Pagode", tom: "C", capo: "não", visivel: true },
+            { titulo: "O ÚLTIMO ROMÂNTICO", artista: "Lulu Santos", estilo: "Rock", tom: "E", capo: "não", visivel: true },
+            { titulo: "O VENTO", artista: "Outro", estilo: "MPB", tom: "G#m", capo: "não", visivel: true },
+            { titulo: "OH! BELA", artista: "Outro", estilo: "Outro", tom: "C", capo: "não", visivel: true },
+            { titulo: "Olhos Coloridos", artista: "Sandra de Sá", estilo: "Rock", tom: "Cm", capo: "não", visivel: true },
+            { titulo: "OLINDA", artista: "Alceu Valença", estilo: "Outro", tom: "F", capo: "não", visivel: true },
+            { titulo: "ONDE ANDA VOCÊ", artista: "Vinicius de Moraes", estilo: "Bossa Nova", tom: "C", capo: "não", visivel: true },
+            { titulo: "Onde canta o sabiá", artista: "Mastruz com Leite", estilo: "Forró", tom: "G", capo: "não", visivel: true },
+            { titulo: "ONDE DEUS POSSA ME OUVIR", artista: "Vander Lee", estilo: "MPB", tom: "C", capo: "não", visivel: true },
+            { titulo: "ONDE ESTÁ O MEU AMOR?", artista: "RPM", estilo: "MPB", tom: "G", capo: "não", visivel: true },
+            { titulo: "ONDE ESTÁ VOCÊ", artista: "Dominguinhos", estilo: "Forró", tom: "Gm", capo: "não", visivel: true },
+            { titulo: "ORAÇÃO DE SÃO FRANCISCO", artista: "Fagner", estilo: "Outro", tom: "Dm", capo: "não", visivel: true },
+            { titulo: "Os Corações Não São Iguais", artista: "Roupa Nova", estilo: "MPB", tom: "G", capo: "não", visivel: true },
+            { titulo: "OUTRA VEZ", artista: "Roberto Carlos", estilo: "MPB", tom: "F", capo: "não", visivel: true },
+            { titulo: "OUTRA VIDA", artista: "João Gomes", estilo: "Forró", tom: "Cm", capo: "não", visivel: true },
+            { titulo: "PACIÊNCIA", artista: "Lenine", estilo: "MPB", tom: "G", capo: "não", visivel: true },
+
+            // Bloco 22 (25 músicas)
+            { titulo: "PÁGINA DE AMIGOS", artista: "Chitãozinho e Xororó", estilo: "Sertanejo", tom: "A#m", capo: "não", visivel: true },
+            { titulo: "PAGODE RUSSO", artista: "Luiz Gonzaga", estilo: "Forró", tom: "Gm", capo: "não", visivel: true },
+            { titulo: "Pai", artista: "Fábio Jr", estilo: "MPB", tom: "G", capo: "não", visivel: true },
+            { titulo: "PAIS E FILHOS", artista: "Legião Urbana", estilo: "Rock", tom: "G", capo: "não", visivel: true },
+            { titulo: "PAÍS TROPICAL", artista: "Ivete Sangalo", estilo: "Axé", tom: "G", capo: "não", visivel: true },
+            { titulo: "Paisagem na Janela", artista: "Milton Nascimento", estilo: "MPB", tom: "A", capo: "não", visivel: true },
+            { titulo: "Paixão Errada", artista: "Dorgival Dantas", estilo: "Forró", tom: "E", capo: "não", visivel: true },
+            { titulo: "PALCO", artista: "Gilberto Gil", estilo: "MPB", tom: "D", capo: "não", visivel: true },
+            { titulo: "PÃO DE MEL", artista: "Zezé Di Camargo e Luciano", estilo: "Sertanejo", tom: "E", capo: "não", visivel: true },
+            { titulo: "PAPEL MARCHE", artista: "João Bosco", estilo: "MPB", tom: "C", capo: "não", visivel: true },
+            { titulo: "PARAÍBA", artista: "Luiz Gonzaga", estilo: "Forró", tom: "A", capo: "não", visivel: true },
+            { titulo: "PAREI NA CONTRA MÃO", artista: "Roberto Carlos", estilo: "Jovem Guarda", tom: "E", capo: "não", visivel: true },
+            { titulo: "PÁSSARO DE FOGO", artista: "Paula Fernandes", estilo: "Sertanejo", tom: "F", capo: "não", visivel: true },
+            { titulo: "Passe a Mão no Rabo Dela", artista: "Brasas do Forró", estilo: "Forró", tom: "A#", capo: "não", visivel: true },
+            { titulo: "PAU DE ARARA", artista: "Luiz Gonzaga", estilo: "Forró", tom: "Dm", capo: "não", visivel: true },
+            { titulo: "PAU NAS COISAS", artista: "Outro", estilo: "Forró", tom: "Dm", capo: "não", visivel: true },
+            { titulo: "PAULINHA", artista: "Calcinha Preta", estilo: "Forró", tom: "C", capo: "não", visivel: true },
+            { titulo: "PAZ E AMOR", artista: "Jorge e Mateus", estilo: "Sertanejo", tom: "Cm", capo: "3ª casa", visivel: true },
+            { titulo: "Pé na Areia", artista: "Diogo Nogueira", estilo: "Pagode", tom: "D", capo: "não", visivel: true },
+            { titulo: "PEÇA FELICIDADE", artista: "Melim", estilo: "MPB", tom: "Dm", capo: "não", visivel: true },
+            { titulo: "PECADO CAPITAL", artista: "Paulinho da Viola", estilo: "Pagode", tom: "Dm", capo: "não", visivel: true },
+            { titulo: "Pedras", artista: "Zezé Di Camargo e Luciano", estilo: "Sertanejo", tom: "G", capo: "não", visivel: true },
+            { titulo: "Pega o Guanabara e vem", artista: "Alanzim Coreano", estilo: "Sertanejo", tom: "E", capo: "não", visivel: true },
+            { titulo: "PENSE EM MIM", artista: "Leandro e Leonardo", estilo: "Sertanejo", tom: "F", capo: "não", visivel: true },
+            { titulo: "PENSE EM MIM", artista: "Cheiro de Amor", estilo: "Forró", tom: "F#m", capo: "não", visivel: true },
+
+            // Bloco 23 (25 músicas)
+            { titulo: "Perdoa-me", artista: "Comunidade Católica Shalom", estilo: "Católica", tom: "E", capo: "não", visivel: true },
+            { titulo: "Pergunta Sem Respostas", artista: "Brasas do Forró", estilo: "Forró", tom: "A", capo: "não", visivel: true },
+            { titulo: "Perigo", artista: "Outro", estilo: "MPB", tom: "D", capo: "não", visivel: true },
+            { titulo: "Pescador de Ilusões", artista: "O Rappa", estilo: "Rock", tom: "Am", capo: "não", visivel: true },
+            { titulo: "PÉSSIMO NEGÓCIO", artista: "Dilsinho", estilo: "Pagode", tom: "G", capo: "não", visivel: true },
+            { titulo: "PINTURA ÍNTIMA", artista: "Kid Abelha", estilo: "Rock", tom: "A", capo: "não", visivel: true },
+            { titulo: "Pior É Te Perder", artista: "Zezé Di Camargo e Luciano", estilo: "Sertanejo", tom: "G", capo: "não", visivel: true },
+            { titulo: "PLANETA DE CORES", artista: "Forrozão Tropykália", estilo: "Forró", tom: "Dm", capo: "não", visivel: true },
+            { titulo: "PONTO FINAL", artista: "Os Nonatos", estilo: "Forró", tom: "C", capo: "não", visivel: true },
+            { titulo: "PONTO G", artista: "Os Nonatos", estilo: "Forró", tom: "C", capo: "não", visivel: true },
+            { titulo: "POR CAUSA DE VOCÊ", artista: "The Fevers", estilo: "Jovem Guarda", tom: "C", capo: "não", visivel: true },
+            { titulo: "POR ENQUANTO", artista: "Cássia Eller", estilo: "MPB", tom: "E", capo: "não", visivel: true },
+            { titulo: "PORQUE ELE VIVE", artista: "Padre Zeca", estilo: "Gospel", tom: "G", capo: "não", visivel: true },
+            { titulo: "Porque Eu Sei Que é Amor", artista: "Titãs", estilo: "Rock", tom: "C", capo: "não", visivel: true },
+            { titulo: "Porque Homem não Chora", artista: "Pablo", estilo: "Brega", tom: "Bm", capo: "não", visivel: true },
+            { titulo: "Pra Não Pensar em Você", artista: "Zezé Di Camargo e Luciano", estilo: "Sertanejo", tom: "F", capo: "não", visivel: true },
+            { titulo: "PRA NINAR MEU CORAÇÃO", artista: "Maciel Melo", estilo: "Forró", tom: "D", capo: "não", visivel: true },
+            { titulo: "Pra recomeçar", artista: "Mastruz com Leite", estilo: "Forró", tom: "D", capo: "não", visivel: true },
+            { titulo: "PRA RUA ME LEVAR", artista: "Ana Carolina", estilo: "MPB", tom: "D", capo: "não", visivel: true },
+            { titulo: "PRA SEMPRE VOU TE AMAR", artista: "Robinson Monteiro", estilo: "MPB", tom: "D#", capo: "não", visivel: true },
+            { titulo: "PRA SER AMOR", artista: "Outro", estilo: "MPB", tom: "G", capo: "não", visivel: true },
+            { titulo: "PRA SER SINCERO", artista: "Engenheiros do Hawaii", estilo: "Rock", tom: "D", capo: "não", visivel: true },
+            { titulo: "PRAIEIRO", artista: "Jammil e Uma Noites", estilo: "Axé", tom: "E", capo: "não", visivel: true },
+            { titulo: "Preciso Dizer Que Te Amo", artista: "Leo Jaime", estilo: "MPB", tom: "E", capo: "não", visivel: true },
+            { titulo: "PRECISO SER AMADO", artista: "Zezé Di Camargo e Luciano", estilo: "Sertanejo", tom: "D", capo: "não", visivel: true },
+
+            // Bloco 24 (25 músicas)
+            { titulo: "Princesa", artista: "Amado Batista", estilo: "Brega", tom: "C", capo: "não", visivel: true },
+            { titulo: "PRINCÍPIO DO PRAZER", artista: "Geraldo Azevedo", estilo: "MPB", tom: "D", capo: "não", visivel: true },
+            { titulo: "Princípio, Meio e Fim", artista: "Rita de Cássia", estilo: "Forró", tom: "E", capo: "não", visivel: true },
+            { titulo: "PROIBIDA PRA MIM", artista: "Zeca Baleiro", estilo: "MPB", tom: "G", capo: "não", visivel: true },
+            { titulo: "PROPOSTA", artista: "Roberto Carlos", estilo: "MPB", tom: "G", capo: "não", visivel: true },
+            { titulo: "QUALQUER COISA", artista: "Caetano Veloso", estilo: "MPB", tom: "C", capo: "não", visivel: true },
+            { titulo: "Qualquer Jeito", artista: "Kátia", estilo: "MPB", tom: "G", capo: "não", visivel: true },
+            { titulo: "Quando Chega o Verão", artista: "Dominguinhos", estilo: "Forró", tom: "C", capo: "não", visivel: true },
+            { titulo: "QUANDO É AMOR", artista: "Só Pra Contrariar", estilo: "Pagode", tom: "D", capo: "não", visivel: true },
+            { titulo: "QUANDO GIRA O MUNDO", artista: "Fábio Jr", estilo: "MPB", tom: "G", capo: "não", visivel: true },
+            { titulo: "QUANDO TE ENCONTREI", artista: "Raça Negra", estilo: "Pagode", tom: "A", capo: "não", visivel: true },
+            { titulo: "QUANTO CUSTA", artista: "Dorgival Dantas", estilo: "Forró", tom: "E", capo: "não", visivel: true },
+            { titulo: "QUASE", artista: "Cleber e Cauan", estilo: "Sertanejo", tom: "B", capo: "não", visivel: true },
+            { titulo: "QUE NEM VEM-VEM", artista: "Maciel Melo", estilo: "Forró", tom: "D", capo: "não", visivel: true },
+            { titulo: "QUE PAÍS É ESSE", artista: "Legião Urbana", estilo: "Rock", tom: "Dm", capo: "não", visivel: true },
+            { titulo: "QUE SE CHAMA AMOR", artista: "Só Pra Contrariar", estilo: "Pagode", tom: "G", capo: "não", visivel: true },
+            { titulo: "QUE SORTE A NOSSA", artista: "Matheus e Kauan", estilo: "Sertanejo", tom: "G", capo: "não", visivel: true },
+            { titulo: "QUEM AMA CUIDA", artista: "Aviões do Forró", estilo: "Forró", tom: "G", capo: "não", visivel: true },
+            { titulo: "QUEM DE NÓS DOIS", artista: "Ana Carolina", estilo: "MPB", tom: "Am", capo: "não", visivel: true },
+            { titulo: "QUEM SABE ISSO QUER DIZER AMOR", artista: "Milton Nascimento", estilo: "MPB", tom: "G", capo: "não", visivel: true },
+            { titulo: "quente e gostoso", artista: "4 Non Blondes", estilo: "Forró", tom: "C", capo: "não", visivel: true },
+            { titulo: "Quero chiclete", artista: "Chiclete Com Banana", estilo: "Axé", tom: "A", capo: "não", visivel: true },
+            { titulo: "QUERO MERGULHAR NAS PROFUNDEZAS", artista: "Padre Marcelo Rossi", estilo: "Gospel", tom: "E", capo: "não", visivel: true },
+            { titulo: "QUERO TE ENCONTRAR", artista: "Claudinho e Buchecha", estilo: "MPB", tom: "F", capo: "não", visivel: true },
+            { titulo: "Rádio Pirata", artista: "RPM", estilo: "Rock", tom: "B", capo: "não", visivel: true },
+
+            // Bloco 25 (25 músicas)
+            { titulo: "RAZÕES", artista: "Mastruz com Leite", estilo: "Forró", tom: "E", capo: "não", visivel: true },
+            { titulo: "RECIFOLIA", artista: "Outro", estilo: "Outro", tom: "Em", capo: "não", visivel: true },
+            { titulo: "REFRÃO DE BOLERO", artista: "Engenheiros do Hawaii", estilo: "MPB", tom: "Bm", capo: "não", visivel: true },
+            { titulo: "REGRA TRÊS", artista: "Tom Jobim", estilo: "Bossa Nova", tom: "Am", capo: "não", visivel: true },
+            { titulo: "Reinará Sobre Nós", artista: "Outro", estilo: "Católica", tom: "E", capo: "não", visivel: true },
+            { titulo: "RELÓGIO", artista: "Outro", estilo: "Bolero", tom: "D#", capo: "não", visivel: true },
+            { titulo: "Reluz", artista: "Marcos Sabino", estilo: "MPB", tom: "E", capo: "não", visivel: true },
+            { titulo: "RENOVA-ME", artista: "Vida Reluz", estilo: "Gospel", tom: "D", capo: "não", visivel: true },
+            { titulo: "Resposta", artista: "Nando Reis", estilo: "Rock", tom: "G", capo: "não", visivel: true },
+            { titulo: "RETRATO", artista: "Louro Santos e Victor Santos", estilo: "Forró", tom: "G#m", capo: "não", visivel: true },
+            { titulo: "RETRATOS E CANÇÕES", artista: "Sandra de Sá", estilo: "Pop", tom: "D", capo: "não", visivel: true },
+            { titulo: "RETROVISOR", artista: "Fagner", estilo: "MPB", tom: "E", capo: "não", visivel: true },
+            { titulo: "REVELAÇÃO", artista: "Fagner", estilo: "MPB", tom: "Gm", capo: "não", visivel: true },
+            { titulo: "REVOLUÇÕES POR MINUTO", artista: "RPM", estilo: "Rock", tom: "Am", capo: "não", visivel: true },
+            { titulo: "Revoluções Por Minuto", artista: "RPM", estilo: "Rock", tom: "Cm", capo: "não", visivel: true },
+            { titulo: "Rindo à Toa", artista: "Falamansa", estilo: "Forró", tom: "F", capo: "não", visivel: true },
+            { titulo: "RIO E CANOA", artista: "Fábio Jr", estilo: "MPB", tom: "F", capo: "não", visivel: true },
+            { titulo: "RODA E AVISA", artista: "Alceu Valença", estilo: "Outro", tom: "Am", capo: "não", visivel: true },
+            { titulo: "ROMANCE DESAPEGADO", artista: "Wesley Safadão", estilo: "Forró", tom: "Bm", capo: "não", visivel: true },
+            { titulo: "Romance Rosa", artista: "Edson Lima", estilo: "MPB", tom: "G", capo: "não", visivel: true },
+            { titulo: "Romance Rosa", artista: "Edson Lima", estilo: "Sertanejo", tom: "G", capo: "não", visivel: true },
+            { titulo: "ROMÂNTICOS", artista: "Vander Lee", estilo: "MPB", tom: "E", capo: "não", visivel: true },
+            { titulo: "Romaria", artista: "Renato Teixeira", estilo: "MPB", tom: "D", capo: "não", visivel: true },
+            { titulo: "S.O.S", artista: "Raul Seixas", estilo: "Rock", tom: "G", capo: "não", visivel: true },
+            { titulo: "SÁBADO", artista: "José Augusto", estilo: "MPB", tom: "E", capo: "não", visivel: true },
+
+            // Bloco 26 (25 músicas)
+            { titulo: "SACA ROLHA", artista: "Outro", estilo: "Outro", tom: "Cm", capo: "não", visivel: true },
+            { titulo: "Sacramento da Comunhão", artista: "Diácono Nelsinho Corrêa", estilo: "Gospel", tom: "D", capo: "não", visivel: true },
+            { titulo: "SAIDEIRA", artista: "Skank", estilo: "Rock", tom: "Gm", capo: "não", visivel: true },
+            { titulo: "SAIGON", artista: "Emílio Santiago", estilo: "MPB", tom: "D", capo: "não", visivel: true },
+            { titulo: "Samba de Orly [c]", artista: "Vinicius de Moraes", estilo: "Bossa Nova", tom: "D#", capo: "não", visivel: true },
+            { titulo: "SAMBA DE VERÃO", artista: "Caetano Veloso", estilo: "MPB", tom: "F", capo: "não", visivel: true },
+            { titulo: "SAMBA DIFERENTE", artista: "Molejo", estilo: "Pagode", tom: "G", capo: "não", visivel: true },
+            { titulo: "SAMPA", artista: "Caetano Veloso", estilo: "MPB", tom: "C", capo: "não", visivel: true },
+            { titulo: "SAMURAI", artista: "Djavan", estilo: "MPB", tom: "E", capo: "não", visivel: true },
+            { titulo: "Sanctus", artista: "Comunidade Católica Shalom", estilo: "Católica", tom: "Gm", capo: "não", visivel: true },
+            { titulo: "Sanfona Sentida", artista: "Dominguinhos", estilo: "Forró", tom: "Dm", capo: "não", visivel: true },
+            { titulo: "SANGRANDO", artista: "Gonzaguinha", estilo: "MPB", tom: "Bm", capo: "não", visivel: true },
+            { titulo: "Santo é o Senhor", artista: "Comunidade Católica Shalom", estilo: "Católica", tom: "Em", capo: "não", visivel: true },
+            { titulo: "Saudade", artista: "Eduardo Costa", estilo: "Sertanejo", tom: "G", capo: "não", visivel: true },
+            { titulo: "Saudade de Nós", artista: "Outro", estilo: "MPB", tom: "D", capo: "não", visivel: true },
+            { titulo: "SAUDADE DE OCÊ", artista: "Gilberto Gil", estilo: "Forró", tom: "D", capo: "não", visivel: true },
+            { titulo: "Saudade de Rosa", artista: "Conde do Forró", estilo: "Brega", tom: "Gm", capo: "não", visivel: true },
+            { titulo: "SAUDOSA MALOCA", artista: "Adoniran Barbosa", estilo: "Pagode", tom: "Am", capo: "não", visivel: true },
+            { titulo: "SE AINDA EXISTE AMOR", artista: "Balthazar", estilo: "Brega", tom: "A", capo: "não", visivel: true },
+            { titulo: "SE EU MORASSE AQUI PERTINHO", artista: "Dorgival Dantas", estilo: "Forró", tom: "G", capo: "não", visivel: true },
+            { titulo: "SE EU NÃO TE AMASSE TANTO ASSIM", artista: "Ivete Sangalo", estilo: "MPB", tom: "F#m", capo: "não", visivel: true },
+            { titulo: "SE FOR AMOR", artista: "João Gomes", estilo: "Sertanejo", tom: "Em", capo: "não", visivel: true },
+            { titulo: "Se Meu Amor Não Chegar", artista: "Reginaldo Rossi", estilo: "Brega", tom: "Fm", capo: "não", visivel: true },
+            { titulo: "Se Tiver Coragem Joga Fora", artista: "Bruno e Marrone", estilo: "Sertanejo", tom: "A", capo: "não", visivel: true },
+            { titulo: "SECRETÁRIA", artista: "Amado Batista", estilo: "Brega", tom: "E", capo: "não", visivel: true },
+
+            // Bloco 27 (25 músicas)
+            { titulo: "Segredo das Luzes", artista: "Outro", estilo: "MPB", tom: "Em", capo: "não", visivel: true },
+            { titulo: "SEGREDOS", artista: "Frejat", estilo: "Rock", tom: "E", capo: "não", visivel: true },
+            { titulo: "SEGUINDO NO TREM AZUL", artista: "Roupa Nova", estilo: "MPB", tom: "C", capo: "não", visivel: true },
+            { titulo: "Selva Branca", artista: "Chiclete Com Banana", estilo: "Axé", tom: "Em", capo: "não", visivel: true },
+            { titulo: "SEM AR", artista: "DBlack", estilo: "MPB", tom: "G", capo: "não", visivel: true },
+            { titulo: "SEM FERROLHO E SEM TRAMELA", artista: "Flávio José", estilo: "Forró", tom: "Em", capo: "não", visivel: true },
+            { titulo: "SEM LIMITES PRA SONHAR", artista: "Fábio Jr", estilo: "MPB", tom: "A", capo: "não", visivel: true },
+            { titulo: "Sem Medo de Ser Feliz", artista: "Zezé Di Camargo e Luciano", estilo: "Sertanejo", tom: "D", capo: "não", visivel: true },
+            { titulo: "Sem Ter Hora Pra Acabar", artista: "Outro", estilo: "Forró", tom: "F", capo: "não", visivel: true },
+            { titulo: "SENHOR QUE VIESTES SALVAR", artista: "Padre Zeca", estilo: "Gospel", tom: "D", capo: "não", visivel: true },
+            { titulo: "Sensível Demais", artista: "Jorge Vercillo", estilo: "MPB", tom: "G", capo: "não", visivel: true },
+            { titulo: "SEQUENCIA", artista: "Músicas Infantis", estilo: "Outro", tom: "E", capo: "não", visivel: true },
+            { titulo: "SERÁ", artista: "Legião Urbana", estilo: "Rock", tom: "C", capo: "não", visivel: true },
+            { titulo: "SERÁ", artista: "Só Pra Contrariar", estilo: "Pagode", tom: "C", capo: "não", visivel: true },
+            { titulo: "Será", artista: "Só Pra Contrariar", estilo: "Pagode", tom: "B", capo: "não", visivel: true },
+            { titulo: "SEREIA", artista: "Lulu Santos", estilo: "Rock", tom: "F", capo: "não", visivel: true },
+            { titulo: "SERESTEIRO DAS NOITES", artista: "Amado Batista", estilo: "Brega", tom: "A#", capo: "não", visivel: true },
+            { titulo: "Seu Amor Ainda É Tudo", artista: "João Mineiro e Marciano", estilo: "Sertanejo", tom: "Cm", capo: "não", visivel: true },
+            { titulo: "SEU OLHAR NÃO MENTE", artista: "Flávio José", estilo: "Forró", tom: "Cm", capo: "não", visivel: true },
+            { titulo: "Simbora", artista: "Asa de Águia", estilo: "Axé", tom: "C#m", capo: "não", visivel: true },
+            { titulo: "SINÔNIMOS", artista: "Zé Ramalho", estilo: "MPB", tom: "G", capo: "não", visivel: true },
+            { titulo: "Só dá Você na minha vida", artista: "João Paulo e Daniel", estilo: "Sertanejo", tom: "E", capo: "não", visivel: true },
+            { titulo: "SÓ HOJE", artista: "Jota Quest", estilo: "Rock", tom: "E", capo: "não", visivel: true },
+            { titulo: "SÓ LOVE", artista: "Claudinho e Buchecha", estilo: "MPB", tom: "G#", capo: "não", visivel: true },
+            { titulo: "Só quero você", artista: "Noda de Caju", estilo: "Forró", tom: "B", capo: "não", visivel: true },
+
+            // Bloco 28 (25 músicas)
+            { titulo: "Sol do meu verão", artista: "Limão Com Mel", estilo: "Forró", tom: "C", capo: "não", visivel: true },
+            { titulo: "SOL DO MEU VERÃO", artista: "Noda de Caju", estilo: "Forró", tom: "A", capo: "não", visivel: true },
+            { titulo: "Solidão", artista: "Leandro e Leonardo", estilo: "Sertanejo", tom: "A", capo: "não", visivel: true },
+            { titulo: "Solidão", artista: "Alceu Valença", estilo: "MPB", tom: "E", capo: "não", visivel: true },
+            { titulo: "Some ou Me Assume", artista: "João Gomes", estilo: "Forró", tom: "Em", capo: "não", visivel: true },
+            { titulo: "SOMOS QUEM PODEMOS SER", artista: "Engenheiros do Hawaii", estilo: "Rock", tom: "G", capo: "não", visivel: true },
+            { titulo: "SONDA-ME", artista: "Padre Marcelo Rossi", estilo: "Gospel", tom: "Gm", capo: "não", visivel: true },
+            { titulo: "SONHAR CONTIGO", artista: "Outro", estilo: "Bolero", tom: "D#", capo: "não", visivel: true },
+            { titulo: "SONHEI COM VOCÊ", artista: "Outro", estilo: "Bolero", tom: "D#", capo: "não", visivel: true },
+            { titulo: "SONHEI DEMAIS", artista: "Outro", estilo: "Bolero", tom: "D#", capo: "não", visivel: true },
+            { titulo: "Sonho de amor", artista: "Limão Com Mel", estilo: "Forró", tom: "E", capo: "não", visivel: true },
+            { titulo: "SONHO DE AMOR", artista: "Zezé Di Camargo e Luciano", estilo: "Sertanejo", tom: "Em", capo: "não", visivel: true },
+            { titulo: "SONHOS", artista: "Peninha", estilo: "MPB", tom: "Cm", capo: "não", visivel: true },
+            { titulo: "SORRI (SMILE)", artista: "Djavan", estilo: "MPB", tom: "A", capo: "não", visivel: true },
+            { titulo: "SOSSEGUEI", artista: "Jorge e Mateus", estilo: "Sertanejo", tom: "G", capo: "não", visivel: true },
+            { titulo: "Sou Fã", artista: "Christian e Cristiano", estilo: "Sertanejo", tom: "A", capo: "não", visivel: true },
+            { titulo: "SOU FELIZ", artista: "Jorge de Altinho", estilo: "Forró", tom: "C", capo: "não", visivel: true },
+            { titulo: "SOU IGUALZINHO A VOCÊ", artista: "Amado Batista", estilo: "Brega", tom: "D", capo: "não", visivel: true },
+            { titulo: "Sozinho", artista: "Caetano Veloso", estilo: "MPB", tom: "D", capo: "não", visivel: true },
+            { titulo: "Stand By Me", artista: "Ben E King", estilo: "Internacional", tom: "A", capo: "não", visivel: true },
+            { titulo: "Stuck On You", artista: "Lionel Richie", estilo: "Internacional", tom: "F", capo: "não", visivel: true },
+            { titulo: "SUPERFANTÁSTICO", artista: "A Turma do Balão Mágico", estilo: "Outro", tom: "E", capo: "não", visivel: true },
+            { titulo: "TÁ COM MEDO DE AMAR É?", artista: "Simone e Simaria", estilo: "Forró", tom: "G", capo: "não", visivel: true },
+            { titulo: "TA HI", artista: "Carmen Miranda", estilo: "Outro", tom: "Cm", capo: "não", visivel: true },
+            { titulo: "Tá na cara", artista: "Araketu", estilo: "Pagode", tom: "C", capo: "não", visivel: true },
+
+            // Bloco 29 (25 músicas)
+            { titulo: "Tá por Fora", artista: "Só Pra Contrariar", estilo: "Pagode", tom: "A", capo: "não", visivel: true },
+            { titulo: "TÁ VENDO AQUELA LUA", artista: "Thiaguinho", estilo: "Pagode", tom: "E", capo: "não", visivel: true },
+            { titulo: "TALISMÃ", artista: "Leandro e Leonardo", estilo: "Sertanejo", tom: "F", capo: "não", visivel: true },
+            { titulo: "TÃO SOMENTE UMA VEZ", artista: "Outro", estilo: "Bolero", tom: "D#", capo: "não", visivel: true },
+            { titulo: "TARDE EM ITAPOÃ", artista: "Toquinho", estilo: "Bossa Nova", tom: "Gm", capo: "não", visivel: true },
+            { titulo: "TARDE EM ITAPUÃ", artista: "Toquinho", estilo: "Bossa Nova", tom: "Gm", capo: "não", visivel: true },
+            { titulo: "TÁXI LUNAR", artista: "Geraldo Azevedo", estilo: "MPB", tom: "Dm", capo: "não", visivel: true },
+            { titulo: "Te Amar foi um Erro", artista: "Ataíde e Alexandre", estilo: "Brega", tom: "D", capo: "não", visivel: true },
+            { titulo: "Te Amar Sem Medo", artista: "Só Pra Contrariar", estilo: "MPB", tom: "E", capo: "não", visivel: true },
+            { titulo: "TE AMO", artista: "Byafra", estilo: "MPB", tom: "Bm", capo: "não", visivel: true },
+            { titulo: "Te Vivo", artista: "Luan Santana", estilo: "Sertanejo", tom: "C", capo: "não", visivel: true },
+            { titulo: "TELEFONE MUDO", artista: "Trio Parada Dura", estilo: "Sertanejo", tom: "E", capo: "não", visivel: true },
+            { titulo: "Tem Cabaré Essa Noite", artista: "Nattan", estilo: "Forró", tom: "F#m", capo: "não", visivel: true },
+            { titulo: "TEMPO PERDIDO", artista: "Legião Urbana", estilo: "Rock", tom: "Dm", capo: "não", visivel: true },
+            { titulo: "TEMPORAL", artista: "Art Popular", estilo: "Pagode", tom: "C", capo: "não", visivel: true },
+            { titulo: "Temporal", artista: "Art Popular", estilo: "Pagode", tom: "F#m", capo: "não", visivel: true },
+            { titulo: "TEMPORAL DE AMOR", artista: "Leandro e Leonardo", estilo: "Sertanejo", tom: "E", capo: "não", visivel: true },
+            { titulo: "TEMPORAL DE AMOR", artista: "Leonardo", estilo: "Sertanejo", tom: "E", capo: "não", visivel: true },
+            { titulo: "TEMPOS MODERNOS", artista: "Lulu Santos", estilo: "Rock", tom: "Em", capo: "não", visivel: true },
+            { titulo: "TENHO MEDO", artista: "Zé Vaqueiro", estilo: "Sertanejo", tom: "Em", capo: "não", visivel: true },
+            { titulo: "TENTATIVAS EM VÃO", artista: "Wesley Safadão", estilo: "Forró", tom: "C", capo: "não", visivel: true },
+            { titulo: "Tentei te Esquecer", artista: "Matogrosso e Mathias", estilo: "Sertanejo", tom: "B", capo: "não", visivel: true },
+            { titulo: "Terra Seca", artista: "Fraternidade São João Paulo II", estilo: "Católica", tom: "D", capo: "não", visivel: true },
+            { titulo: "Timidez", artista: "Cavalo de Pau", estilo: "Forró", tom: "E", capo: "não", visivel: true },
+            { titulo: "TO BEBENDO TO PAGANDO", artista: "Frank Aguiar", estilo: "Forró", tom: "Em", capo: "não", visivel: true },
+
+            // Bloco 30 (25 músicas)
+            { titulo: "TÔ FAZENDO FALTA", artista: "Outro", estilo: "MPB", tom: "A", capo: "não", visivel: true },
+            { titulo: "TOCANDO EM FRENTE", artista: "Almir Sater", estilo: "Sertanejo", tom: "D", capo: "não", visivel: true },
+            { titulo: "TODA FORMA DE AMOR", artista: "Lulu Santos", estilo: "Rock", tom: "A", capo: "não", visivel: true },
+            { titulo: "TODO AZUL DO MAR", artista: "Flávio Venturini", estilo: "MPB", tom: "D", capo: "não", visivel: true },
+            { titulo: "Todo tempo é pouco", artista: "Mastruz com Leite", estilo: "Forró", tom: "E", capo: "não", visivel: true },
+            { titulo: "Toma conta de mim", artista: "Limão Com Mel", estilo: "Forró", tom: "C", capo: "não", visivel: true },
+            { titulo: "Tortura de Amor", artista: "Waldick Soriano", estilo: "Seresta", tom: "E", capo: "não", visivel: true },
+            { titulo: "Trem Bala", artista: "Ana Vilela", estilo: "MPB", tom: "E", capo: "não", visivel: true },
+            { titulo: "TUA BOCA", artista: "Belo", estilo: "Pagode", tom: "G", capo: "não", visivel: true },
+            { titulo: "Tubarões", artista: "Diego e Victor Hugo", estilo: "Sertanejo", tom: "G#", capo: "não", visivel: true },
+            { titulo: "TUDO OUTRA VEZ", artista: "Belchior", estilo: "MPB", tom: "F", capo: "não", visivel: true },
+            { titulo: "Tudo que eu queria Agora", artista: "Raphael Moura", estilo: "Forró", tom: "F", capo: "não", visivel: true },
+            { titulo: "UM AMOR PURO", artista: "Djavan", estilo: "MPB", tom: "D", capo: "não", visivel: true },
+            { titulo: "Um Bom Perdedor", artista: "Bruno e Marrone", estilo: "Sertanejo", tom: "C", capo: "não", visivel: true },
+            { titulo: "UM CHOPP PRA DISTRAIR", artista: "Paulo Diniz", estilo: "MPB", tom: "C", capo: "não", visivel: true },
+            { titulo: "UM DIA DE DOMINGO", artista: "Tim Maia", estilo: "Soul", tom: "E", capo: "não", visivel: true },
+            { titulo: "Um Dia de Domingo", artista: "Tim Maia", estilo: "MPB", tom: "E", capo: "não", visivel: true },
+            { titulo: "UM DIA, UM ADEUS", artista: "Guilherme Arantes", estilo: "MPB", tom: "Bm", capo: "não", visivel: true },
+            { titulo: "UM DIA, UM ADEUS", artista: "Guilherme Arantes", estilo: "MPB", tom: "C#m", capo: "não", visivel: true },
+            { titulo: "UM MINUTO", artista: "DBlack", estilo: "MPB", tom: "A", capo: "não", visivel: true },
+            { titulo: "Um Sonho a Dois", artista: "Roupa Nova", estilo: "MPB", tom: "B", capo: "não", visivel: true },
+            { titulo: "UM SONHO DE AMOR", artista: "Limão Com Mel", estilo: "Forró", tom: "Am", capo: "não", visivel: true },
+            { titulo: "UMA LOUCA TEMPESTADE", artista: "Ana Carolina", estilo: "MPB", tom: "C", capo: "não", visivel: true },
+            { titulo: "UMA NOITE E MEIA", artista: "Marina Lima", estilo: "MPB", tom: "F#m", capo: "não", visivel: true },
+            { titulo: "Uma Prá Mim, Outra Prá Tu", artista: "Luiz Gonzaga", estilo: "Forró", tom: "F", capo: "não", visivel: true },
+
+            // Bloco 31 (25 músicas)
+            { titulo: "Usted Se Me Llevó La Vida", artista: "Alexandre Pires", estilo: "Internacional", tom: "G", capo: "não", visivel: true },
+            { titulo: "VACILÃO", artista: "Zeca Pagodinho", estilo: "Pagode", tom: "A", capo: "não", visivel: true },
+            { titulo: "VAI DAR NAMORO", artista: "Bruno e Marrone", estilo: "Sertanejo", tom: "G", capo: "não", visivel: true },
+            { titulo: "VAMBORA", artista: "Adriana Calcanhotto", estilo: "MPB", tom: "A", capo: "não", visivel: true },
+            { titulo: "VAMOS FUGIR", artista: "Skank", estilo: "Reggae", tom: "F", capo: "não", visivel: true },
+            { titulo: "VEJA MARGARIDA", artista: "Geraldo Azevedo", estilo: "MPB", tom: "C", capo: "não", visivel: true },
+            { titulo: "VELHA INFÂNCIA", artista: "Tribalistas", estilo: "MPB", tom: "Dm", capo: "não", visivel: true },
+            { titulo: "VEM ME AMAR", artista: "Zé Vaqueiro", estilo: "Sertanejo", tom: "C#m", capo: "não", visivel: true },
+            { titulo: "VENHO A TI", artista: "Outro", estilo: "Gospel", tom: "G", capo: "não", visivel: true },
+            { titulo: "VENTO NO LITORAL", artista: "Legião Urbana", estilo: "Rock", tom: "Am", capo: "não", visivel: true },
+            { titulo: "VERDADE CHINESA", artista: "Emílio Santiago", estilo: "Pagode", tom: "Am", capo: "não", visivel: true },
+            { titulo: "VESTIBULAR", artista: "Outro", estilo: "Outro", tom: "D#", capo: "não", visivel: true },
+            { titulo: "Vida", artista: "Henrique e Juliano", estilo: "Sertanejo", tom: "A", capo: "não", visivel: true },
+            { titulo: "VIDA CIGANA", artista: "Raça Negra", estilo: "Pagode", tom: "G", capo: "não", visivel: true },
+            { titulo: "VIDA DE VAQUEIRO", artista: "Mastruz com Leite", estilo: "Forró", tom: "C", capo: "não", visivel: true },
+            { titulo: "VIDA VAZIA", artista: "Bruno e Marrone", estilo: "Sertanejo", tom: "F", capo: "não", visivel: true },
+            { titulo: "VIDA VAZIA", artista: "Desejo de Menina", estilo: "Forró", tom: "A", capo: "não", visivel: true },
+            { titulo: "VILA DO SOSSEGO", artista: "Zé Ramalho", estilo: "MPB", tom: "G", capo: "não", visivel: true },
+            { titulo: "VIVENDO POR VIVER", artista: "Zezé Di Camargo e Luciano", estilo: "Sertanejo", tom: "G", capo: "não", visivel: true },
+            { titulo: "VIVER UMA PAIXÃO", artista: "Banda Magníficos", estilo: "Forró", tom: "C", capo: "não", visivel: true },
+            { titulo: "VIVIR SIN AIRE", artista: "Outro", estilo: "Internacional", tom: "E", capo: "não", visivel: true },
+            { titulo: "Voa Voa", artista: "Chiclete Com Banana", estilo: "Axé", tom: "Am", capo: "não", visivel: true },
+            { titulo: "VOCÊ DE VOLTA", artista: "Só Pra Contrariar", estilo: "Pagode", tom: "Fm", capo: "não", visivel: true },
+            { titulo: "Você de Volta", artista: "Só Pra Contrariar", estilo: "Pagode", tom: "E", capo: "não", visivel: true },
+            { titulo: "Você é linda", artista: "Caetano Veloso", estilo: "MPB", tom: "A", capo: "não", visivel: true },
+
+            // Bloco 32 (16 músicas)
+            { titulo: "VOCÊ ME VIRA A CABEÇA", artista: "Alcione", estilo: "MPB", tom: "Dm", capo: "não", visivel: true },
+            { titulo: "VOCÊ NÃO ME ENSINOU A TE ESQUECER", artista: "Caetano Veloso", estilo: "MPB", tom: "Dm", capo: "não", visivel: true },
+            { titulo: "VOCÊ VAI VER", artista: "Zezé Di Camargo e Luciano", estilo: "Sertanejo", tom: "F", capo: "não", visivel: true },
+            { titulo: "Vogais e Consoantes", artista: "Jorge e Mateus", estilo: "Sertanejo", tom: "G", capo: "não", visivel: true },
+            { titulo: "VOLTA AO COMEÇO", artista: "Fábio Jr", estilo: "MPB", tom: "G", capo: "não", visivel: true },
+            { titulo: "VOLTA POR BAIXO", artista: "Henrique e Juliano", estilo: "Sertanejo", tom: "Cm", capo: "não", visivel: true },
+            { titulo: "VONTADE", artista: "Santanna O Cantador", estilo: "Forró", tom: "E", capo: "não", visivel: true },
+            { titulo: "Vontade Dividida", artista: "Milionário e José Rico", estilo: "Sertanejo", tom: "F", capo: "não", visivel: true },
+            { titulo: "VOU TE PROCURAR", artista: "Os Travessos", estilo: "Pagode", tom: "G", capo: "não", visivel: true },
+            { titulo: "WAVE", artista: "Tom Jobim", estilo: "Bossa Nova", tom: "D", capo: "não", visivel: true },
+            { titulo: "XOTE DA ALEGRIA", artista: "Falamansa", estilo: "Forró", tom: "F#", capo: "não", visivel: true },
+            { titulo: "Xote das Meninas", artista: "Luiz Gonzaga", estilo: "Forró", tom: "G", capo: "não", visivel: true },
+            { titulo: "Xote dos Milagres", artista: "Falamansa", estilo: "Forró", tom: "G", capo: "não", visivel: true },
+            { titulo: "YESTERDAY", artista: "The Beatles", estilo: "Internacional", tom: "F", capo: "não", visivel: true },
+            { titulo: "ZÉ DA RECAÍDA", artista: "Gusttavo Lima", estilo: "Sertanejo", tom: "F", capo: "não", visivel: true },
+            { titulo: "Zóio de Lula", artista: "Charlie Brown Jr", estilo: "Rock", tom: "C#m", capo: "não", visivel: true }
+        ];
+
+        function openLandingScreen() {
+            document.getElementById("landingView").style.display = "flex";
+            document.getElementById("catalogView").style.display = "none";
+            document.getElementById("requestsView").style.display = "none";
+        }
+
+        function openMenuScreen() {
+            document.getElementById("landingView").style.display = "none";
+            document.getElementById("catalogView").style.display = "block";
+            document.getElementById("requestsView").style.display = "none";
+            filterSongs();
+        }
+
+        function toggleHostRequests() {
+            const requestsView = document.getElementById("requestsView");
+            const isOpen = requestsView.style.display !== "none";
+            if (isOpen) {
+                openMenuScreen();
+            } else {
+                document.getElementById("landingView").style.display = "none";
+                document.getElementById("catalogView").style.display = "none";
+                requestsView.style.display = "block";
+                renderRequests();
+            }
+        }
+
+        document.addEventListener("keydown", (event) => {
+            if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "p") {
+                event.preventDefault();
+                toggleHostRequests();
+            }
+        });
+
+        function formatBRL(value) {
+            return Number(value).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+        }
+
+        function generateAutoPixPayload(amount) {
+            const cents = Math.round(Number(amount) * 100);
+            const token = "PIXAUTO" + cents.toString(36).toUpperCase() + Math.random().toString(36).slice(2, 8).toUpperCase();
+            return `00020126580014BR.GOV.BCB.PIX0136${token}520400005303986540${cents}5802BR5915MACVANNY MUSICA6009ARCOVERDE62070503***6304`;
+        }
+
+        function drawSimulatedQRCode(canvasId, seedText) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            const ctx = canvas.getContext("2d");
+            const size = canvas.width;
+            const cells = 21;
+            const cellSize = Math.floor(size / cells);
+            const offset = Math.floor((size - cellSize * cells) / 2);
+
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, size, size);
+
+            let hash = 2166136261;
+            for (let i = 0; i < seedText.length; i++) {
+                hash ^= seedText.charCodeAt(i);
+                hash = Math.imul(hash, 16777619);
+            }
+
+            function drawFinder(row, col) {
+                for (let r = 0; r < 7; r++) {
+                    for (let c = 0; c < 7; c++) {
+                        const isBorder = r === 0 || r === 6 || c === 0 || c === 6;
+                        const isCenter = r >= 2 && r <= 4 && c >= 2 && c <= 4;
+                        if (isBorder || isCenter) {
+                            ctx.fillStyle = "#111111";
+                            ctx.fillRect(offset + (col + c) * cellSize, offset + (row + r) * cellSize, cellSize, cellSize);
+                        }
+                    }
+                }
+            }
+
+            drawFinder(0, 0);
+            drawFinder(0, cells - 7);
+            drawFinder(cells - 7, 0);
+
+            for (let r = 0; r < cells; r++) {
+                for (let c = 0; c < cells; c++) {
+                    const inTopLeft = r < 8 && c < 8;
+                    const inTopRight = r < 8 && c >= cells - 8;
+                    const inBottomLeft = r >= cells - 8 && c < 8;
+                    if (inTopLeft || inTopRight || inBottomLeft) continue;
+
+                    hash ^= (r * 31 + c * 17 + ((hash >>> 8) & 255));
+                    hash = Math.imul(hash, 1664525) + 1013904223;
+                    if (((hash >>> 24) & 1) === 1) {
+                        ctx.fillStyle = "#111111";
+                        ctx.fillRect(offset + c * cellSize, offset + r * cellSize, cellSize, cellSize);
+                    }
+                }
+            }
+        }
+
+        function updatePixPreview() {
+            const previewBox = document.getElementById("pixGeneratedPreview");
+            if (selectedPixAmount > 0) {
+                const code = generateAutoPixPayload(selectedPixAmount);
+                document.getElementById("previewPixAmountText").textContent = `Chave e QR Code gerados para ${formatBRL(selectedPixAmount)}`;
+                document.getElementById("previewPixCode").textContent = code;
+                drawSimulatedQRCode("previewQrCanvas", code);
+                previewBox.classList.add("visible");
+            } else {
+                previewBox.classList.remove("visible");
+            }
+        }
+
+        function selectPresetAmount(amount, btnEl) {
+            selectedPixAmount = Number(amount);
+            document.getElementById("customPixAmount").value = "";
+            document.querySelectorAll(".pix-chip").forEach(btn => btn.classList.remove("active"));
+            if (btnEl) btnEl.classList.add("active");
+            updatePixPreview();
+        }
+
+        function handleCustomAmountInput() {
+            const rawVal = parseFloat(document.getElementById("customPixAmount").value);
+            document.querySelectorAll(".pix-chip").forEach(btn => btn.classList.remove("active"));
+            if (!isNaN(rawVal) && rawVal > 0) {
+                selectedPixAmount = Number(rawVal.toFixed(2));
+            } else {
+                selectedPixAmount = 0;
+            }
+            updatePixPreview();
+        }
+
+        function clearPixSelection() {
+            selectedPixAmount = 0;
+            document.getElementById("customPixAmount").value = "";
+            document.querySelectorAll(".pix-chip").forEach(btn => btn.classList.remove("active"));
+            updatePixPreview();
+        }
+
+        function copyPixCode(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast("Chave Pix copiada!");
+                }).catch(() => {
+                    showToast("Chave Pix pronta para copiar.");
+                });
+            } else {
+                showToast("Chave Pix pronta para copiar.");
+            }
+        }
+
+        function loadRequests() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                return raw ? JSON.parse(raw) : [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function saveRequests(list) {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+            } catch (e) {}
+        }
+
+        function showToast(text) {
+            const toast = document.getElementById("toast");
+            toast.textContent = text;
+            toast.style.display = "block";
+            clearTimeout(window.toastTimer);
+            window.toastTimer = setTimeout(() => {
+                toast.style.display = "none";
+            }, 2600);
+        }
+
+        function openRequestModal(song) {
+            selectedSong = song;
+            activeRequestId = null;
+            document.getElementById("modalSongInfo").textContent = `${song.titulo} — ${song.artista}`;
+            document.getElementById("requesterName").value = "";
+            document.getElementById("requestMessage").value = "";
+            clearPixSelection();
+
+            document.getElementById("orderFormPanel").style.display = "block";
+            document.getElementById("confirmationPanel").classList.remove("visible");
+            document.getElementById("confirmedPixStep").style.display = "none";
+            document.getElementById("contributionThanksBox").classList.remove("visible");
+
+            document.getElementById("requestModal").classList.add("open");
+            document.getElementById("requesterName").focus();
+        }
+
+        function closeRequestModal() {
+            selectedSong = null;
+            activeRequestId = null;
+            document.getElementById("requestModal").classList.remove("open");
+        }
+
+        function handleBackdropClick(event) {
+            if (event.target.id === "requestModal") {
+                closeRequestModal();
+            }
+        }
+
+        function submitRequest(event) {
+            event.preventDefault();
+            if (!selectedSong) return;
+
+            const name = document.getElementById("requesterName").value.trim();
+            const message = document.getElementById("requestMessage").value.trim();
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+            const hasContribution = selectedPixAmount > 0;
+            const pixCode = hasContribution ? generateAutoPixPayload(selectedPixAmount) : "";
+            const reqId = Date.now() + "-" + Math.random().toString(36).slice(2, 7);
+
+            const requests = loadRequests();
+            requests.unshift({
+                id: reqId,
+                titulo: selectedSong.titulo,
+                artista: selectedSong.artista,
+                estilo: selectedSong.estilo,
+                nome: name,
+                mensagem: message,
+                horario: timeStr,
+                tocada: false,
+                contribuicaoValor: hasContribution ? selectedPixAmount : 0,
+                contribuicaoConfirmada: false
+            });
+
+            activeRequestId = reqId;
+            saveRequests(requests);
+            updateRequestBadge();
+            renderRequests();
+
+            document.getElementById("orderFormPanel").style.display = "none";
+            document.getElementById("confirmationPanel").classList.add("visible");
+            document.getElementById("confirmedSongTitle").textContent = `${selectedSong.titulo} — ${selectedSong.artista}`;
+
+            if (hasContribution) {
+                document.getElementById("confirmedPixStep").style.display = "block";
+                document.getElementById("confirmedPixAmountLabel").textContent = `Contribuição escolhida: ${formatBRL(selectedPixAmount)}`;
+                document.getElementById("confirmedPixCode").textContent = pixCode;
+                drawSimulatedQRCode("confirmedQrCanvas", pixCode);
+                const payBtn = document.getElementById("markContributionDoneBtn");
+                payBtn.disabled = false;
+                payBtn.textContent = "Confirmar que realizei a contribuição";
+            } else {
+                document.getElementById("confirmedPixStep").style.display = "none";
+            }
+        }
+
+        function confirmContributionCompleted() {
+            if (!activeRequestId || selectedPixAmount <= 0) return;
+
+            const requests = loadRequests().map(item =>
+                item.id === activeRequestId ? { ...item, contribuicaoConfirmada: true } : item
+            );
+            saveRequests(requests);
+            renderRequests();
+
+            const payBtn = document.getElementById("markContributionDoneBtn");
+            payBtn.disabled = true;
+            payBtn.textContent = "Contribuição confirmada";
+
+            const thanksBox = document.getElementById("contributionThanksBox");
+            const thanksText = document.getElementById("contributionThanksText");
+            const senderGreeting = document.getElementById("requesterName").value.trim();
+            thanksText.textContent = `${senderGreeting ? senderGreeting + ", muito" : "Muito"} obrigado pela sua contribuição de ${formatBRL(selectedPixAmount)}! Seu apoio fortalece a música ao vivo e torna a noite ainda mais especial.`;
+            thanksBox.classList.add("visible");
+
+            showToast("Obrigado pela sua contribuição!");
+        }
+
+        function togglePlayed(id) {
+            const requests = loadRequests().map(item =>
+                item.id === id ? { ...item, tocada: !item.tocada } : item
+            );
+            saveRequests(requests);
+            renderRequests();
+            updateRequestBadge();
+        }
+
+        function removeRequest(id) {
+            const requests = loadRequests().filter(item => item.id !== id);
+            saveRequests(requests);
+            updateRequestBadge();
+            renderRequests();
+        }
+
+        function clearRequests() {
+            saveRequests([]);
+            updateRequestBadge();
+            renderRequests();
+            showToast("Fila de pedidos limpa.");
+        }
+
+        function updateRequestBadge() {
+            const pendingCount = loadRequests().filter(item => !item.tocada).length;
+            document.getElementById("requestBadgeCount").textContent = pendingCount;
+        }
+
+        function renderRequests() {
+            const listDiv = document.getElementById("requestsList");
+            const requests = loadRequests();
+            listDiv.innerHTML = "";
+
+            if (requests.length === 0) {
+                listDiv.innerHTML = '<p style="text-align:center; color:#777;">Nenhum pedido na fila no momento.</p>';
+                return;
+            }
+
+            requests.forEach(item => {
+                const card = document.createElement("div");
+                card.className = "request-card" + (item.tocada ? " played" : "");
+
+                const top = document.createElement("div");
+                top.className = "request-top";
+
+                const title = document.createElement("h3");
+                title.textContent = item.titulo;
+
+                const time = document.createElement("span");
+                time.className = "request-time";
+                time.textContent = item.horario + (item.tocada ? " • Tocada" : "");
+
+                top.appendChild(title);
+                top.appendChild(time);
+
+                const artist = document.createElement("p");
+                artist.className = "request-artist";
+                artist.textContent = `${item.artista} • ${item.estilo}`;
+
+                card.appendChild(top);
+                card.appendChild(artist);
+
+                if (item.nome) {
+                    const sender = document.createElement("p");
+                    sender.className = "request-sender";
+                    sender.textContent = `De: ${item.nome}`;
+                    card.appendChild(sender);
+                }
+
+                if (item.contribuicaoValor > 0) {
+                    const tip = document.createElement("p");
+                    tip.className = "request-tip";
+                    tip.textContent = `Pix: ${formatBRL(item.contribuicaoValor)} (${item.contribuicaoConfirmada ? "Confirmado" : "Aguardando confirmação"})`;
+                    card.appendChild(tip);
+                }
+
+                if (item.mensagem) {
+                    const msg = document.createElement("p");
+                    msg.className = "request-message";
+                    msg.textContent = `“${item.mensagem}”`;
+                    card.appendChild(msg);
+                }
+
+                const reqActions = document.createElement("div");
+                reqActions.className = "request-actions";
+
+                const playBtn = document.createElement("button");
+                playBtn.type = "button";
+                playBtn.className = "secondary-btn";
+                playBtn.textContent = item.tocada ? "Marcar pendente" : "Marcar tocada";
+                playBtn.addEventListener("click", () => togglePlayed(item.id));
+
+                const delBtn = document.createElement("button");
+                delBtn.type = "button";
+                delBtn.className = "secondary-btn";
+                delBtn.textContent = "Remover";
+                delBtn.addEventListener("click", () => removeRequest(item.id));
+
+                reqActions.appendChild(playBtn);
+                reqActions.appendChild(delBtn);
+                card.appendChild(reqActions);
+
+                listDiv.appendChild(card);
+            });
+        }
+
+        function populateArtists() {
+            const artistSelect = document.getElementById("artistSelect");
+            const artists = [...new Set(
+                repertorio
+                    .filter(m => m.visivel !== false && m.artista)
+                    .map(m => m.artista.trim())
+            )].sort((a, b) => a.localeCompare(b, "pt-BR"));
+
+            artists.forEach(artista => {
+                const option = document.createElement("option");
+                option.value = artista;
+                option.textContent = artista;
+                artistSelect.appendChild(option);
+            });
+        }
+
+        function hasActiveFilter() {
+            const search = document.getElementById("searchInput").value.trim();
+            const genre = document.getElementById("genreSelect").value;
+            const artist = document.getElementById("artistSelect").value;
+            return search !== "" || genre !== "" || artist !== "";
+        }
+
+        function displaySongs(songs, shouldShowList) {
+            const listDiv = document.getElementById("songList");
+            const countDiv = document.getElementById("songCount");
+            const activeSongs = repertorio.filter(m => m.visivel !== false);
+            listDiv.innerHTML = "";
+
+            if (!shouldShowList) {
+                countDiv.textContent = `${activeSongs.length} músicas no repertório — selecione um estilo, artista ou digite na busca`;
+                listDiv.innerHTML = '<div class="empty-prompt">Escolha um <strong>Estilo</strong> ou <strong>Artista</strong> (ou digite no campo de busca) para visualizar as músicas.</div>';
+                return;
+            }
+
+            countDiv.textContent = `Exibindo ${songs.length} de ${activeSongs.length} músicas disponíveis`;
+
+            if (songs.length === 0) {
+                listDiv.innerHTML = '<p style="text-align:center; color:#888;">Nenhuma música encontrada com esses filtros.</p>';
+                return;
+            }
+
+            songs.forEach(song => {
+                const card = document.createElement("div");
+                card.className = "song-card";
+
+                const info = document.createElement("div");
+                info.className = "song-info";
+
+                const title = document.createElement("h3");
+                title.textContent = song.titulo;
+
+                const artist = document.createElement("p");
+                artist.textContent = song.artista;
+
+                info.appendChild(title);
+                info.appendChild(artist);
+
+                const actions = document.createElement("div");
+                actions.className = "actions";
+
+                const badge = document.createElement("span");
+                badge.className = "badge";
+                badge.textContent = song.estilo;
+
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.className = "request-btn";
+                btn.textContent = "Pedir";
+                btn.addEventListener("click", () => openRequestModal(song));
+
+                actions.appendChild(badge);
+                actions.appendChild(btn);
+
+                card.appendChild(info);
+                card.appendChild(actions);
+                listDiv.appendChild(card);
+            });
+        }
+
+        function filterSongs() {
+            const search = document.getElementById("searchInput").value.toLowerCase().trim();
+            const genre = document.getElementById("genreSelect").value;
+            const artist = document.getElementById("artistSelect").value;
+            const active = hasActiveFilter();
+
+            if (!active) {
+                displaySongs([], false);
+                return;
+            }
+
+            const filtered = repertorio.filter(song => {
+                if (song.visivel === false) return false;
+                const matchText =
+                    search === "" ||
+                    song.titulo.toLowerCase().includes(search) ||
+                    song.artista.toLowerCase().includes(search);
+                const matchGenre = genre === "" || song.estilo === genre;
+                const matchArtist = artist === "" || song.artista.trim() === artist;
+                return matchText && matchGenre && matchArtist;
+            });
+
+            displaySongs(filtered, true);
+        }
+
+        function clearFilters() {
+            document.getElementById("searchInput").value = "";
+            document.getElementById("genreSelect").value = "";
+            document.getElementById("artistSelect").value = "";
+            filterSongs();
+        }
+
+        applyMediaAssets();
+        populateArtists();
+        updateRequestBadge();
+        displaySongs([], false);
+    </script>
+</body>
+</html>
