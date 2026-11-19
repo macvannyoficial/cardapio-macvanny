@@ -446,7 +446,7 @@
                 <input type="text" id="searchInput" placeholder="Pesquisar por música ou artista..." onkeyup="filterSongs()" oninput="filterSongs()">
 
                 <div class="filters-row">
-                    <select id="genreSelect" onchange="filterSongs()">
+                    <select id="genreSelect" onchange="onGenreChange()">
                         <option value="">Escolha um Estilo</option>
                         <option value="Axé">Axé</option>
                         <option value="Bolero">Bolero</option>
@@ -471,7 +471,7 @@
                         <option value="Soul">Soul</option>
                     </select>
 
-                    <select id="artistSelect" onchange="filterSongs()">
+                    <select id="artistSelect" onchange="onArtistChange()">
                         <option value="">Escolha um Artista</option>
                     </select>
                 </div>
@@ -1955,7 +1955,21 @@
                 listDiv.appendChild(card);
             });
         }
+function onGenreChange() {
+    const genre = document.getElementById("genreSelect").value;
+    if (genre !== "") {
+        document.getElementById("artistSelect").value = "";
+    }
+    filterSongs();
+}
 
+function onArtistChange() {
+    const artist = document.getElementById("artistSelect").value;
+    if (artist !== "") {
+        document.getElementById("genreSelect").value = "";
+    }
+    filterSongs();
+}
         function filterSongs() {
             const search = document.getElementById("searchInput").value.toLowerCase().trim();
             const genre = document.getElementById("genreSelect").value;
