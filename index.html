@@ -1674,19 +1674,29 @@ let activeRequestId = null;
     }
 
    function drawSimulatedQRCode(canvasId, seedText) {
-      const canvas = document.getElementById(canvasId);
-      if (!canvas || !seedText || !window.QRCode) return;
+      const target = document.getElementById(canvasId);
+      if (!target || !seedText) return;
 
-      window.QRCode.toCanvas(canvas, String(seedText), {
-        width: canvas.width || 148,
-        margin: 4,
-        color: {
-          dark: "#000000",
-          light: "#FFFFFF"
-        }
-      }, function (err) {
-        if (err) console.error("Erro QR:", err);
-      });
+      const size = target.width || 148;
+      const qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=" + size + "x" + size + "&margin=8&data=" + encodeURIComponent(String(seedText));
+
+      let img = document.getElementById("pixQrImageFallback");
+      if (!img) {
+        img = document.createElement("img");
+        img.id = "pixQrImageFallback";
+        img.alt = "QR Code Pix";
+        img.style.width = size + "px";
+        img.style.height = size + "px";
+        img.style.background = "#FFFFFF";
+        img.style.padding = "6px";
+        img.style.borderRadius = "8px";
+        img.style.display = "block";
+        img.style.margin = "0 auto";
+        target.parentNode.insertBefore(img, target);
+      }
+
+      target.style.display = "none";
+      img.src = qrUrl;
     }
 
         
