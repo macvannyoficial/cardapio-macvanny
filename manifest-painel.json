@@ -1,0 +1,21 @@
+{
+  "name": "Painel de Pedidos — Modo Palco",
+  "short_name": "Painel Palco",
+  "start_url": "./painel.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#121212",
+  "icons": [
+    {
+      "src": "./logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
