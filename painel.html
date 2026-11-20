@@ -268,7 +268,7 @@
       <button type="button" class="menu-btn" id="btnEstatisticas">
         <span class="menu-icon">📊</span>
         <span class="menu-title">ESTATÍSTICAS</span>
-        <span class="menu-desc">Mais pedidas, estilos em alta, horários de pico e Pix</span>
+        <span class="menu-desc">Mais pedidas, artistas/estilos em alta, horários de pico e Pix</span>
       </button>
     </section>
   </main>
@@ -296,7 +296,7 @@
     const conteudoStats = document.getElementById("conteudoStats");
 
     function buscarPedidosLocais() {
-      const chavesPossiveis = ["pedidos", "pedidos_cardapio", "cardapio_pedidos", "orders"];
+      const chavesPossiveis = ["cardapio_pedidos_cache", "pedidos", "pedidos_cardapio", "orders"];
       for (const chave of chavesPossiveis) {
         try {
           const bruto = localStorage.getItem(chave);
@@ -315,21 +315,25 @@
       const pendentes = total - tocadas;
       const taxaAtendimento = total > 0 ? Math.round((tocadas / total) * 100) : 0;
 
-      const comPix = pedidos.filter(p => Boolean(p.pix || p.valorPix || p.gorjeta || p.contribuiuPix)).length;
+      const comPix = pedidos.filter(p => {
+        const val = Number(String(p.pix_valor || p.pix || p.valorPix || "").replace(",", "."));
+        return (!Number.isNaN(val) && val > 0) || Boolean(p.gorjeta || p.contribuiuPix);
+      }).length;
       const pctPix = total > 0 ? Math.round((comPix / total) * 100) : 0;
 
       const contagemMusicas = {};
-      const contagemEstilos = {};
+      const contagemCategorias = {};
       const contagemHorarios = {};
 
       pedidos.forEach(p => {
         const musica = (p.musica || p.titulo || p.nome || "Sem título").trim();
-        const artista = (p.artista || "").trim();
-        const rotuloMusica = artista ? `${musica} — ${artista}` : musica;
+        const artistaEstilo = (p.artista_estilo || p.artista || p.estilo || "").trim();
+        const rotuloMusica = artistaEstilo ? `${musica} — ${artistaEstilo}` : musica;
         contagemMusicas[rotuloMusica] = (contagemMusicas[rotuloMusica] || 0) + 1;
 
-        const estilo = (p.estilo || p.ritmo || p.genero || "Não informado").trim();
-        contagemEstilos[estilo] = (contagemEstilos[estilo] || 0) + 1;
+        if (artistaEstilo) {
+          contagemCategorias[artistaEstilo] = (contagemCategorias[artistaEstilo] || 0) + 1;
+        }
 
         const dataRef = p.criadoEm || p.timestamp || p.data || p.hora;
         if (dataRef) {
@@ -354,7 +358,7 @@
         comPix,
         pctPix,
         topMusicas: ordenarTop(contagemMusicas),
-        topEstilos: ordenarTop(contagemEstilos),
+        topCategorias: ordenarTop(contagemCategorias),
         topHorarios: ordenarTop(contagemHorarios)
       };
     }
@@ -388,8 +392,8 @@
       if (!pedidos.length) {
         conteudoStats.innerHTML = `
           <div class="empty-msg">
-            Nenhum pedido encontrado no armazenamento local deste navegador ainda.<br>
-            Assim que os pedidos chegarem em <strong>VER PEDIDOS</strong>, os indicadores aparecerão aqui automaticamente.
+            Nenhum pedido encontrado no histórico local deste navegador ainda.<br>
+            Abra <strong>VER PEDIDOS</strong> para carregar os pedidos do show e os indicadores aparecerão aqui automaticamente.
           </div>
         `;
         modal.classList.add("open");
@@ -417,7 +421,7 @@
           </div>
         </div>
         ${renderizarRanking("🏆 Músicas Mais Pedidas", stats.topMusicas)}
-        ${renderizarRanking("🎸 Estilos / Ritmos em Alta", stats.topEstilos)}
+        ${renderizarRanking("🎸 Artistas / Estilos em Alta", stats.topCategorias)}
         ${renderizarRanking("⏰ Horários de Pico", stats.topHorarios)}
       `;
       modal.classList.add("open");
