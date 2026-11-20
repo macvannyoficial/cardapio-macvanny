@@ -1615,42 +1615,62 @@ let activeRequestId = null;
             return Number(value).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
         }
 
-        function generateAutoPixPayload(amount) {
-            const cents = Math.round(Number(amount) * 100);
-            const token = "PIXAUTO" + cents.toString(36).toUpperCase() + Math.random().toString(36).slice(2, 8).toUpperCase();
-            return `00020126580014BR.GOV.BCB.PIX0136${token}520400005303986540${cents}5802BR5915MACVANNY MUSICA6009ARCOVERDE62070503***6304`;
+        function emvField(id, value) {
+      const str = String(value);
+      return id + String(str.length).padStart(2, '0') + str;
+    }
+
+    function crc16Ccitt(payload) {
+      let crc = 0xFFFF;
+      for (let i = 0; i < payload.length; i++) {
+        crc ^= payload.charCodeAt(i) << 8;
+        for (let bit = 0; bit < 8; bit++) {
+          if ((crc & 0x8000) !== 0) {
+            crc = ((crc << 1) ^ 0x1021) & 0xFFFF;
+          } else {
+            crc = (crc << 1) & 0xFFFF;
+          }
         }
+      }
+      return crc.toString(16).toUpperCase().padStart(4, '0');
+    }
 
-        function drawSimulatedQRCode(canvasId, seedText) {
-            const canvas = document.getElementById(canvasId);
-            if (!canvas) return;
-            const ctx = canvas.getContext("2d");
-            const size = canvas.width;
-            const cells = 21;
-            const cellSize = Math.floor(size / cells);
-            const offset = Math.floor((size - cellSize * cells) / 2);
+    function generateAutoPixPayload(amount) {
+      const numericAmount = Number(amount);
+      const safeAmount = Number.isFinite(numericAmount) && numericAmount > 0
+        ? numericAmount.toFixed(2)
+        : null;
 
-            ctx.fillStyle = "#ffffff";
-            ctx.fillRect(0, 0, size, size);
+      const pixKey = "06014191461";
+      const merchantName = "MACVANNY OLIVEIRA BARBOSA".slice(0, 25);
+      const merchantCity = "ARCOVERDE".slice(0, 15);
+      const txid = ("PIX" + Date.now().toString(36).toUpperCase()).slice(0, 25);
 
-            let hash = 2166136261;
-            for (let i = 0; i < seedText.length; i++) {
-                hash ^= seedText.charCodeAt(i);
-                hash = Math.imul(hash, 16777619);
-            }
+      const gui = emvField("00", "BR.GOV.BCB.PIX");
+      const keyField = emvField("01", pixKey);
+      const merchantAccountInfo = emvField("26", gui + keyField);
+      const mcc = emvField("52", "0000");
+      const currency = emvField("53", "986");
+      const amountField = safeAmount ? emvField("54", safeAmount) : "";
+      const countryCode = emvField("58", "BR");
+      const nameField = emvField("59", merchantName);
+      const cityField = emvField("60", merchantCity);
+      const additionalData = emvField("62", emvField("05", txid));
 
-            function drawFinder(row, col) {
-                for (let r = 0; r < 7; r++) {
-                    for (let c = 0; c < 7; c++) {
-                        const isBorder = r === 0 || r === 6 || c === 0 || c === 6;
-                        const isCenter = r >= 2 && r <= 4 && c >= 2 && c <= 4;
-                        if (isBorder || isCenter) {
-                            ctx.fillStyle = "#111111";
-                            ctx.fillRect(offset + (col + c) * cellSize, offset + (row + r) * cellSize, cellSize, cellSize);
-                        }
-                    }
-                }
-            }
+      const payloadSemCrc =
+        emvField("00", "01") +
+        merchantAccountInfo +
+        mcc +
+        currency +
+        amountField +
+        countryCode +
+        nameField +
+        cityField +
+        additionalData +
+        "6304";
+
+      return payloadSemCrc + crc16Ccitt(payloadSemCrc);
+    }
 
             drawFinder(0, 0);
             drawFinder(0, cells - 7);
