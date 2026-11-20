@@ -1672,27 +1672,25 @@ let activeRequestId = null;
       return payloadSemCrc + crc16Ccitt(payloadSemCrc);
     }
 
-            drawFinder(0, 0);
-            drawFinder(0, cells - 7);
-            drawFinder(cells - 7, 0);
+   function drawSimulatedQRCode(canvasId, seedText) {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas || !seedText) return;
 
-            for (let r = 0; r < cells; r++) {
-                for (let c = 0; c < cells; c++) {
-                    const inTopLeft = r < 8 && c < 8;
-                    const inTopRight = r < 8 && c >= cells - 8;
-                    const inBottomLeft = r >= cells - 8 && c < 8;
-                    if (inTopLeft || inTopRight || inBottomLeft) continue;
-
-                    hash ^= (r * 31 + c * 17 + ((hash >>> 8) & 255));
-                    hash = Math.imul(hash, 1664525) + 1013904223;
-                    if (((hash >>> 24) & 1) === 1) {
-                        ctx.fillStyle = "#111111";
-                        ctx.fillRect(offset + c * cellSize, offset + r * cellSize, cellSize, cellSize);
-                    }
-                }
-            }
-        }
-
+      if (window.QRCode && typeof window.QRCode.toCanvas === "function") {
+        window.QRCode.toCanvas(canvas, String(seedText), {
+          width: canvas.width || 136,
+          margin: 1,
+          color: {
+            dark: "#111111",
+            light: "#FFFFFF"
+          }
+        }, function (err) {
+          if (err) {
+            console.error("Erro ao gerar QR Code Pix:", err);
+          }
+        });
+      }
+    }
         function updatePixPreview() {
             const previewBox = document.getElementById("pixGeneratedPreview");
             if (selectedPixAmount > 0) {
