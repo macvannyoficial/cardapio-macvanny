@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel de Pedidos — Macvanny</title>
+  <style>
+    :root {
+      --bg: #0f0f12;
+      --card: #191920;
+      --card-border: #2c2c38;
+      --text: #f4f4f6;
+      --muted: #a1a1b0;
+      --accent: #f59e0b;
+      --ok: #22c55e;
+      --warn: #eab308;
+      --danger: #ef4444;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 16px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 820px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    h1 {
+      font-size: 1.35rem;
+      color: var(--accent);
+    }
+
+    .subtitle {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    button {
+      border: 1px solid var(--card-border);
+      background: var(--card);
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.88rem;
+      font-weight: 600;
+      transition: 0.15s ease;
+    }
+
+    button:hover:not(:disabled) {
+      border-color: var(--accent);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    button.active {
+      background: var(--accent);
+      color: #111;
+      border-color: var(--accent);
+    }
+
+    .btn-ok {
+      background: rgba(34, 197, 94, 0.15);
+      border-color: rgba(34, 197, 94, 0.45);
+      color: #86efac;
+    }
+
+    .btn-warn {
+      background: rgba(234, 179, 8, 0.15);
+      border-color: rgba(234, 179, 8, 0.45);
+      color: #fde047;
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.45);
+      color: #fca5a5;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .filters {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .status-info {
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .pedido-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .pedido-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .musica {
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .artista {
+      font-size: 0.9rem;
+      color: var(--accent);
+      margin-top: 2px;
+    }
+
+    .badge {
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .badge-pendente {
+      background: rgba(234, 179, 8, 0.18);
+      color: #fde047;
+      border: 1px solid rgba(234, 179, 8, 0.4);
+    }
+
+    .badge-tocada {
+      background: rgba(34, 197, 94, 0.18);
+      color: #86efac;
+      border: 1px solid rgba(34, 197, 94, 0.4);
+    }
+
+    .badge-cancelada {
+      background: rgba(239, 68, 68, 0.18);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 0.86rem;
+      color: var(--muted);
+    }
+
+    .pix-tag {
+      color: #86efac;
+      font-weight: 700;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding-top: 6px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .empty {
+      text-align: center;
+      padding: 36px 16px;
+      color: var(--muted);
+      background: var(--card);
+      border: 1px dashed var(--card-border);
+      border-radius: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>Painel de Pedidos</h1>
+        <div class="subtitle">Cardápio Musical — Controle em tempo real</div>
+      </div>
+      <div class="controls">
+        <button id="btnRefresh" onclick="carregarPedidos()">Atualizar agora</button>
+        <button id="btnAuto" onclick="toggleAutoRefresh()">Auto: OFF</button>
+      </div>
+    </header>
+
+    <div class="toolbar">
+      <div class="filters">
+        <button id="filter-todos" class="active" onclick="setFiltro('todos')">Todos</button>
+        <button id="filter-pendente" onclick="setFiltro('pendente')">Pendentes</button>
+        <button id="filter-tocada" onclick="setFiltro('tocada')">Tocadas</button>
+        <button id="filter-cancelada" onclick="setFiltro('cancelada')">Canceladas</button>
+      </div>
+      <div id="statusInfo" class="status-info">A carregar...</div>
+    </div>
+
+    <div id="listaPedidos" class="list"></div>
+  </div>
+
+  <script>
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxTP_z5sV_lavHut4p_l9_fOoH5NzmU9JpLZimJ1zvKBvKna2rqXYSqj2rWTZuJJ28q/exec';
+
+    let pedidosCache = [];
+    let filtroAtual = 'todos';
+    let autoTimer = null;
+
+    function setFiltro(filtro) {
+      filtroAtual = filtro;
+      document.querySelectorAll('.filters button').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById('filter-' + filtro);
+      if (activeBtn) activeBtn.classList.add('active');
+      renderizarPedidos();
+    }
+
+    function toggleAutoRefresh() {
+      const btn = document.getElementById('btnAuto');
+      if (autoTimer) {
+        clearInterval(autoTimer);
+        autoTimer = null;
+        btn.textContent = 'Auto: OFF';
+        btn.classList.remove('active');
+      } else {
+        autoTimer = setInterval(() => carregarPedidos(true), 15000);
+        btn.textContent = 'Auto: 15s';
+        btn.classList.add('active');
+        carregarPedidos(true);
+      }
+    }
+
+    async function carregarPedidos(silencioso = false) {
+      const btnRefresh = document.getElementById('btnRefresh');
+      const statusInfo = document.getElementById('statusInfo');
+      if (!silencioso) {
+        btnRefresh.disabled = true;
+        statusInfo.textContent = 'A atualizar pedidos...';
+      }
+
+      try {
+        const resp = await fetch(API_URL + '?t=' + Date.now());
+        const data = await resp.json();
+
+        if (!data.ok) {
+          throw new Error(data.error || 'Falha ao obter pedidos');
+        }
+
+        pedidosCache = Array.isArray(data.pedidos) ? data.pedidos : [];
+        renderizarPedidos();
+        const agora = new Date().toLocaleTimeString('pt-BR');
+        statusInfo.textContent = `${pedidosCache.length} pedido(s) • Atualizado às ${agora}`;
+      } catch (err) {
+        console.error(err);
+        statusInfo.textContent = 'Erro ao carregar: ' + err.message;
+      } finally {
+        btnRefresh.disabled = false;
+      }
+    }
+
+    async function atualizarStatus(id, novoStatus) {
+      const statusInfo = document.getElementById('statusInfo');
+      statusInfo.textContent = `A atualizar estado para "${novoStatus}"...`;
+
+      try {
+        const url = `${API_URL}?action=updateStatus&id=${encodeURIComponent(id)}&status=${encodeURIComponent(novoStatus)}&t=${Date.now()}`;
+        const resp = await fetch(url);
+        const data = await resp.json();
+
+        if (!data.ok) {
+          throw new Error(data.error || 'Não foi possível atualizar');
+        }
+
+        pedidosCache = pedidosCache.map(p =>
+          String(p.id) === String(id) ? { ...p, status: novoStatus } : p
+        );
+        renderizarPedidos();
+        statusInfo.textContent = `Pedido atualizado para "${novoStatus}".`;
+      } catch (err) {
+        console.error(err);
+        statusInfo.textContent = 'Erro ao atualizar: ' + err.message;
+      }
+    }
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function formatarPix(valor) {
+      const num = Number(valor);
+      if (!isNaN(num) && num > 0) {
+        return `Pix: R$ ${num.toFixed(2).replace('.', ',')}`;
+      }
+      if (typeof valor === 'string' && valor.trim() !== '' && valor.trim() !== '0') {
+        return `Pix: ${escapeHtml(valor)}`;
+      }
+      return '';
+    }
+
+    function renderizarPedidos() {
+      const container = document.getElementById('listaPedidos');
+      const filtrados = pedidosCache.filter(p => {
+        const st = String(p.status || 'pendente').toLowerCase();
+        if (filtroAtual === 'todos') return true;
+        return st === filtroAtual;
+      });
+
+      if (!filtrados.length) {
+        container.innerHTML = `<div class="empty">Nenhum pedido encontrado neste filtro.</div>`;
+        return;
+      }
+
+      container.innerHTML = filtrados.map(p => {
+        const st = String(p.status || 'pendente').toLowerCase();
+        const badgeClass =
+          st === 'tocada' ? 'badge-tocada' :
+          st === 'cancelada' ? 'badge-cancelada' :
+          'badge-pendente';
+
+        const pixTexto = formatarPix(p.pix_valor);
+
+        return `
+          <div class="pedido-card">
+            <div class="pedido-top">
+              <div>
+                <div class="musica">${escapeHtml(p.musica || 'Música sem título')}</div>
+                <div class="artista">${escapeHtml(p.artista_estilo || '')}</div>
+              </div>
+              <span class="badge ${badgeClass}">${escapeHtml(st)}</span>
+            </div>
+
+            <div class="meta">
+              ${p.cliente ? `<span>👤 ${escapeHtml(p.cliente)}</span>` : ''}
+              ${p.data_hora ? `<span>🕒 ${escapeHtml(p.data_hora)}</span>` : ''}
+              ${pixTexto ? `<span class="pix-tag">💸 ${pixTexto}</span>` : ''}
+            </div>
+
+            <div class="actions">
+              <button class="btn-ok" onclick="atualizarStatus('${escapeHtml(p.id)}', 'tocada')">✓ Tocada</button>
+              <button class="btn-warn" onclick="atualizarStatus('${escapeHtml(p.id)}', 'pendente')">⏳ Pendente</button>
+              <button class="btn-danger" onclick="atualizarStatus('${escapeHtml(p.id)}', 'cancelada')">✕ Cancelar</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    carregarPedidos();
+  </script>
+</body>
+</html>
