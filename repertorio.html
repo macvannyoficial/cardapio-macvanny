@@ -724,7 +724,7 @@
     async function carregarRepertorio() {
       setStatus('Carregando Minhas Músicas...');
       try {
-        const resp = await fetch(`${API_URL}?action=getRepertorio&t=${Date.now()}`);
+        const resp = await fetch(`${API_URL}?action=getRepertorio&modo=todos&t=${Date.now()}`);
         const data = await resp.json();
         if (!data.ok) throw new Error(data.error || 'Erro ao carregar músicas');
 
