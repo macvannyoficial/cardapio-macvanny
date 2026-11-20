@@ -78,6 +78,7 @@
 
     .controls {
       display: flex;
+      flex-wrap: wrap;
       gap: 8px;
       align-items: center;
     }
@@ -92,10 +93,21 @@
       padding: 8px 12px;
       font-size: 0.86rem;
       font-weight: 600;
+      transition: border-color 0.15s ease, background 0.15s ease;
     }
 
     button:hover {
       border-color: var(--accent);
+    }
+
+    .btn-clear {
+      border-color: rgba(239, 68, 68, 0.45);
+      color: #fca5a5;
+    }
+
+    .btn-clear:hover {
+      border-color: var(--danger);
+      background: rgba(239, 68, 68, 0.12);
     }
 
     .filters-row {
@@ -185,12 +197,6 @@
       border-color: rgba(16, 185, 129, 0.35);
     }
 
-    .badge-cancelada {
-      color: #f87171;
-      background: rgba(239, 68, 68, 0.14);
-      border-color: rgba(239, 68, 68, 0.35);
-    }
-
     .pix-tag {
       display: inline-block;
       color: #6ee7b7;
@@ -216,11 +222,6 @@
       color: #fde047;
     }
 
-    .btn-danger {
-      border-color: rgba(239, 68, 68, 0.45);
-      color: #fca5a5;
-    }
-
     .empty {
       background: var(--card);
       border: 1px solid var(--border);
@@ -242,6 +243,7 @@
       <div class="controls">
         <button id="btnRefresh" type="button">Atualizar agora</button>
         <button id="btnAuto" type="button">Auto: OFF</button>
+        <button id="btnClearHistory" class="btn-clear" type="button">🗑️ Limpar histórico</button>
       </div>
     </div>
 
@@ -250,7 +252,6 @@
         <button class="filter-btn active" data-filter="todos" type="button">Todos</button>
         <button class="filter-btn" data-filter="pendente" type="button">Pendentes</button>
         <button class="filter-btn" data-filter="tocada" type="button">Tocadas</button>
-        <button class="filter-btn" data-filter="cancelada" type="button">Canceladas</button>
       </div>
       <div id="countInfo" class="meta-info">0 pedido(s)</div>
     </div>
@@ -261,6 +262,7 @@
 
   <script>
     const API_URL = 'https://script.google.com/macros/s/AKfycbyWx02nFN3Y8EFe8N6NzIiK_TSI6OijZrQfmfsPQi-eJdNw9U_1ICEjVCRH3lC9l_1c/exec';
+    const STORAGE_KEY = 'cardapio_pedidos_cache';
 
     let pedidosCache = [];
     let filtroAtual = 'todos';
@@ -281,6 +283,17 @@
       return `Pix: ${num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`;
     }
 
+    function normalizarStatus(st) {
+      const s = String(st || 'pendente').toLowerCase().trim();
+      return s === 'tocada' ? 'tocada' : 'pendente';
+    }
+
+    function salvarCacheLocal() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(pedidosCache));
+      } catch (_) {}
+    }
+
     async function carregarPedidos() {
       const statusInfo = document.getElementById('statusInfo');
       statusInfo.textContent = 'Carregando pedidos...';
@@ -290,7 +303,12 @@
         const data = await resp.json();
         if (!data.ok) throw new Error(data.error || 'Erro ao buscar pedidos');
 
-        pedidosCache = Array.isArray(data.pedidos) ? data.pedidos : [];
+        const listaBruta = Array.isArray(data.pedidos) ? data.pedidos : [];
+        pedidosCache = listaBruta
+          .filter(p => String(p.status || '').toLowerCase() !== 'cancelada')
+          .map(p => ({ ...p, status: normalizarStatus(p.status) }));
+
+        salvarCacheLocal();
         renderizarPedidos();
 
         const agora = new Date().toLocaleTimeString('pt-BR');
@@ -301,23 +319,55 @@
     }
 
     async function atualizarStatus(id, novoStatus) {
+      const statusNormalizado = normalizarStatus(novoStatus);
       const statusInfo = document.getElementById('statusInfo');
-      statusInfo.textContent = `Atualizando para "${novoStatus}"...`;
+      statusInfo.textContent = `Atualizando para "${statusNormalizado}"...`;
 
       try {
-        const url = `${API_URL}?action=updateStatus&id=${encodeURIComponent(id)}&status=${encodeURIComponent(novoStatus)}&t=${Date.now()}`;
+        const url = `${API_URL}?action=updateStatus&id=${encodeURIComponent(id)}&status=${encodeURIComponent(statusNormalizado)}&t=${Date.now()}`;
         const resp = await fetch(url);
         const data = await resp.json();
         if (!data.ok) throw new Error(data.error || 'Não foi possível atualizar');
 
         pedidosCache = pedidosCache.map(p =>
-          String(p.id) === String(id) ? { ...p, status: novoStatus } : p
+          String(p.id) === String(id) ? { ...p, status: statusNormalizado } : p
         );
+        salvarCacheLocal();
         renderizarPedidos();
-        statusInfo.textContent = `Pedido atualizado para "${novoStatus}".`;
+        statusInfo.textContent = statusNormalizado === 'tocada'
+          ? 'Música marcada como tocada e movida para "Tocadas".'
+          : 'Pedido devolvido para "Pendentes".';
       } catch (err) {
         statusInfo.textContent = `Erro ao atualizar: ${err.message}`;
       }
+    }
+
+    async function limparHistorico() {
+      if (!pedidosCache.length) {
+        alert('Não há pedidos no histórico para limpar.');
+        return;
+      }
+
+      const confirmar = confirm('Tem certeza de que deseja limpar o histórico de pedidos? Isso remove os itens da tela do painel.');
+      if (!confirmar) return;
+
+      const statusInfo = document.getElementById('statusInfo');
+      statusInfo.textContent = 'Limpando histórico de pedidos...';
+
+      try {
+        const resp = await fetch(`${API_URL}?action=clearHistory&t=${Date.now()}`);
+        const data = await resp.json().catch(() => ({}));
+        if (data && data.ok === false) {
+          throw new Error(data.error || 'API não limpou o histórico');
+        }
+      } catch (_) {
+        // Caso o Apps Script ainda não tenha rota de limpeza, limpa a visualização e o cache local do painel
+      }
+
+      pedidosCache = [];
+      salvarCacheLocal();
+      renderizarPedidos();
+      statusInfo.textContent = 'Histórico limpo com sucesso.';
     }
 
     function renderizarPedidos() {
@@ -325,7 +375,7 @@
       const countInfo = document.getElementById('countInfo');
 
       const filtrados = pedidosCache.filter(p => {
-        const st = String(p.status || 'pendente').toLowerCase();
+        const st = normalizarStatus(p.status);
         if (filtroAtual === 'todos') return true;
         return st === filtroAtual;
       });
@@ -338,13 +388,8 @@
       }
 
       container.innerHTML = filtrados.map(p => {
-        const st = String(p.status || 'pendente').toLowerCase();
-        const badgeClass = st === 'tocada'
-          ? 'badge-tocada'
-          : st === 'cancelada'
-            ? 'badge-cancelada'
-            : 'badge-pendente';
-
+        const st = normalizarStatus(p.status);
+        const badgeClass = st === 'tocada' ? 'badge-tocada' : 'badge-pendente';
         const pixTexto = formatPix(p.pix_valor);
 
         return `
@@ -372,9 +417,10 @@
             </div>
 
             <div class="actions">
-              <button class="btn-ok" onclick="atualizarStatus('${escapeHtml(p.id)}', 'tocada')" type="button">✓ Tocada</button>
-              <button class="btn-warn" onclick="atualizarStatus('${escapeHtml(p.id)}', 'pendente')" type="button">⏳ Pendente</button>
-              <button class="btn-danger" onclick="atualizarStatus('${escapeHtml(p.id)}', 'cancelada')" type="button">✕ Cancelar</button>
+              ${st !== 'tocada'
+                ? `<button class="btn-ok" onclick="atualizarStatus('${escapeHtml(p.id)}', 'tocada')" type="button">✓ Marcar como Tocada</button>`
+                : `<button class="btn-warn" onclick="atualizarStatus('${escapeHtml(p.id)}', 'pendente')" type="button">⏳ Voltar para Pendente</button>`
+              }
             </div>
           </article>
         `;
@@ -391,6 +437,7 @@
     });
 
     document.getElementById('btnRefresh').addEventListener('click', carregarPedidos);
+    document.getElementById('btnClearHistory').addEventListener('click', limparHistorico);
 
     document.getElementById('btnAuto').addEventListener('click', function () {
       if (autoTimer) {
