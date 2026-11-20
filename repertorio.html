@@ -273,6 +273,15 @@
       text-align: center;
       color: var(--muted);
     }
+    .btn-delete {
+      border-color: rgba(239, 68, 68, 0.45);
+      color: #fca5a5;
+    }
+
+    .btn-delete:hover {
+      border-color: #ef4444;
+      background: rgba(239, 68, 68, 0.12);
+    }
   </style>
 </head>
 <body>
@@ -519,6 +528,29 @@
         setStatus(`Erro: ${err.message}`);
       }
     }
+    async function deletarMusica(id, titulo) {
+      const nomeExibicao = titulo ? `"${titulo}"` : 'esta música';
+      const confirmou = confirm(`Tem certeza que deseja deletar ${nomeExibicao} do repertório?`);
+      if (!confirmou) return;
+
+      setStatus('Deletando música...');
+      try {
+        const url = `${API_URL}?action=deleteMusica&id=${encodeURIComponent(id)}&t=${Date.now()}`;
+        const resp = await fetch(url);
+        const data = await resp.json();
+        if (!data.ok) throw new Error(data.error || 'Falha ao deletar música');
+
+        if (String(editandoId) === String(id)) {
+          editandoId = null;
+        }
+        repertorioCache = repertorioCache.filter(item => String(item.id) !== String(id));
+        atualizarFiltroEstilos();
+        renderizarRepertorio();
+        setStatus(`Música ${nomeExibicao} removida do repertório.`);
+      } catch (err) {
+        setStatus(`Erro ao deletar: ${err.message}`);
+      }
+    }
 
     function renderizarRepertorio() {
       const container = document.getElementById('listaRepertorio');
@@ -570,6 +602,9 @@
               </button>
               <button type="button" onclick="abrirEdicao('${safeId}')">
                 ${isEditing ? 'Fechar' : 'Editar'}
+              </button>
+              <button class="btn-delete" type="button" onclick="deletarMusica('${safeId}', '${escapeHtml(item.musica)}')">
+                Deletar
               </button>
             </div>
 
