@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
+<link rel="manifest" href="./manifest-painel.json">
+<meta name="theme-color" content="#121212">
+  <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Painel do Cantor — Cardápio Musical</title>
@@ -122,5 +124,12 @@
       </a>
     </section>
   </main>
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./sw-painel.js").catch(() => {});
+    });
+  }
+</script>
 </body>
 </html>
