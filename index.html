@@ -638,6 +638,24 @@
         }
 
         const STORAGE_KEY = 'cardapio_musical_pedidos_v1';
+const PEDIDOS_API_URL = 'https://script.google.com/macros/s/AKfycbxTP_z5sV_lavHut4p_l9_fOoH5NzmU9JpLZimJ1zvKBvKna2rqXYSqj2rWTZuJJ28q/exec';
+
+async function enviarPedidoParaPlanilha(pedido) {
+  if (!PEDIDOS_API_URL || PEDIDOS_API_URL.includes('COLE_AQUI')) return;
+
+  try {
+    await fetch(PEDIDOS_API_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(pedido)
+    });
+  } catch (err) {
+    console.error('Erro ao enviar pedido para a planilha:', err);
+  }
+}
+}
+}
         let selectedSong = null;
         let selectedPixAmount = 0;
         let activeRequestId = null;
@@ -1728,6 +1746,13 @@
 
             activeRequestId = reqId;
             saveRequests(requests);
+            enviarPedidoParaPlanilha({
+  id: reqId,
+  musica: selectedSong.titulo,
+  artista_estilo: [selectedSong.artista, selectedSong.estilo].filter(Boolean).join(" / "),
+  cliente: [name, message].filter(Boolean).join(" - "),
+  pix_valor: hasContribution ? selectedPixAmount : 0
+});
             updateRequestBadge();
             renderRequests();
 
