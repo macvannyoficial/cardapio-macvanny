@@ -376,10 +376,18 @@
               <span class="badge ${badgeClass}">${escapeHtml(st)}</span>
             </div>
 
-            <div class="meta">
-              ${p.cliente ? `<span>👤 ${escapeHtml(p.cliente)}</span>` : ''}
-             
-              ${pixTexto ? `<span class="pix-tag">💸 ${pixTexto}</span>` : ''}
+            <div style="display: flex; flex-direction: column; gap: 4px; font-size: 0.88rem; color: var(--muted);">
+              ${p.cliente ? (() => {
+                const raw = String(p.cliente).trim();
+                const partes = raw.split(' - ');
+                const nome = partes.length > 1 ? partes.shift().trim() : raw;
+                const msg = partes.join(' - ').trim();
+                return `
+                  ${nome ? `<div>👤 <strong>Nome:</strong> ${escapeHtml(nome)}</div>` : ''}
+                  ${msg ? `<div>💬 <strong>Mensagem:</strong> ${escapeHtml(msg)}</div>` : ''}
+                `;
+              })() : ''}
+              ${pixTexto ? `<div class="pix-tag" style="margin-top: 2px;">💸 ${pixTexto}</div>` : ''}
             </div>
 
             <div class="actions">
