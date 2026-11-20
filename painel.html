@@ -15,6 +15,7 @@
       --text: #f3f4f6;
       --muted: #9ca3af;
       --accent: #f59e0b;
+      --success: #22c55e;
     }
 
     * {
@@ -36,7 +37,7 @@
 
     .container {
       width: 100%;
-      max-width: 680px;
+      max-width: 720px;
     }
 
     .header {
@@ -57,7 +58,7 @@
 
     .menu-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
       gap: 16px;
     }
 
@@ -73,6 +74,9 @@
       padding: 24px 20px;
       text-decoration: none;
       color: var(--text);
+      cursor: pointer;
+      text-align: left;
+      font-family: inherit;
       transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
     }
 
@@ -102,6 +106,143 @@
       color: var(--muted);
       line-height: 1.4;
     }
+
+    /* Modal de Estatísticas */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 50;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-box {
+      width: 100%;
+      max-width: 680px;
+      max-height: 88vh;
+      overflow-y: auto;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 22px;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-header h2 {
+      font-size: 1.25rem;
+      color: var(--accent);
+    }
+
+    .close-btn {
+      background: #232834;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .close-btn:hover {
+      border-color: var(--accent);
+    }
+
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .kpi-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .kpi-label {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .kpi-value {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .kpi-value.accent {
+      color: var(--accent);
+    }
+
+    .kpi-value.success {
+      color: var(--success);
+    }
+
+    .stats-section {
+      margin-bottom: 18px;
+    }
+
+    .stats-section h3 {
+      font-size: 0.98rem;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+
+    .rank-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .rank-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 0.9rem;
+    }
+
+    .rank-badge {
+      background: rgba(245, 158, 11, 0.16);
+      color: var(--accent);
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+    }
+
+    .empty-msg {
+      color: var(--muted);
+      font-size: 0.9rem;
+      background: var(--bg);
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -123,14 +264,170 @@
         <span class="menu-title">REPERTÓRIO</span>
         <span class="menu-desc">Incluir músicas, editar nome, artista, estilo e visibilidade</span>
       </a>
+
+      <button type="button" class="menu-btn" id="btnEstatisticas">
+        <span class="menu-icon">📊</span>
+        <span class="menu-title">ESTATÍSTICAS</span>
+        <span class="menu-desc">Mais pedidas, estilos em alta, horários de pico e Pix</span>
+      </button>
     </section>
   </main>
-<script>
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./sw-painel.js").catch(() => {});
+
+  <div class="modal-backdrop" id="modalEstatisticas" role="dialog" aria-modal="true" aria-labelledby="tituloStats">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 id="tituloStats">📊 Estatísticas dos Pedidos</h2>
+        <button type="button" class="close-btn" id="fecharStats">Fechar</button>
+      </div>
+      <div id="conteudoStats"></div>
+    </div>
+  </div>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw-painel.js").catch(() => {});
+      });
+    }
+
+    const modal = document.getElementById("modalEstatisticas");
+    const btnAbrir = document.getElementById("btnEstatisticas");
+    const btnFechar = document.getElementById("fecharStats");
+    const conteudoStats = document.getElementById("conteudoStats");
+
+    function buscarPedidosLocais() {
+      const chavesPossiveis = ["pedidos", "pedidos_cardapio", "cardapio_pedidos", "orders"];
+      for (const chave of chavesPossiveis) {
+        try {
+          const bruto = localStorage.getItem(chave);
+          if (!bruto) continue;
+          const parsed = JSON.parse(bruto);
+          if (Array.isArray(parsed)) return parsed;
+          if (parsed && Array.isArray(parsed.pedidos)) return parsed.pedidos;
+        } catch (_) {}
+      }
+      return [];
+    }
+
+    function calcularEstatisticas(pedidos) {
+      const total = pedidos.length;
+      const tocadas = pedidos.filter(p => (p.status || "").toLowerCase() === "tocada").length;
+      const pendentes = total - tocadas;
+      const taxaAtendimento = total > 0 ? Math.round((tocadas / total) * 100) : 0;
+
+      const comPix = pedidos.filter(p => Boolean(p.pix || p.valorPix || p.gorjeta || p.contribuiuPix)).length;
+      const pctPix = total > 0 ? Math.round((comPix / total) * 100) : 0;
+
+      const contagemMusicas = {};
+      const contagemEstilos = {};
+      const contagemHorarios = {};
+
+      pedidos.forEach(p => {
+        const musica = (p.musica || p.titulo || p.nome || "Sem título").trim();
+        const artista = (p.artista || "").trim();
+        const rotuloMusica = artista ? `${musica} — ${artista}` : musica;
+        contagemMusicas[rotuloMusica] = (contagemMusicas[rotuloMusica] || 0) + 1;
+
+        const estilo = (p.estilo || p.ritmo || p.genero || "Não informado").trim();
+        contagemEstilos[estilo] = (contagemEstilos[estilo] || 0) + 1;
+
+        const dataRef = p.criadoEm || p.timestamp || p.data || p.hora;
+        if (dataRef) {
+          const d = new Date(dataRef);
+          if (!Number.isNaN(d.getTime())) {
+            const faixaHora = `${String(d.getHours()).padStart(2, "0")}h`;
+            contagemHorarios[faixaHora] = (contagemHorarios[faixaHora] || 0) + 1;
+          }
+        }
+      });
+
+      const ordenarTop = obj =>
+        Object.entries(obj)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 5);
+
+      return {
+        total,
+        tocadas,
+        pendentes,
+        taxaAtendimento,
+        comPix,
+        pctPix,
+        topMusicas: ordenarTop(contagemMusicas),
+        topEstilos: ordenarTop(contagemEstilos),
+        topHorarios: ordenarTop(contagemHorarios)
+      };
+    }
+
+    function renderizarRanking(titulo, itens, sufixo = "pedido(s)") {
+      if (!itens.length) {
+        return `
+          <div class="stats-section">
+            <h3>${titulo}</h3>
+            <div class="empty-msg">Sem dados suficientes ainda.</div>
+          </div>
+        `;
+      }
+      return `
+        <div class="stats-section">
+          <h3>${titulo}</h3>
+          <ul class="rank-list">
+            ${itens.map(([nome, qtd], idx) => `
+              <li class="rank-item">
+                <span><strong>#${idx + 1}</strong> ${nome}</span>
+                <span class="rank-badge">${qtd} ${sufixo}</span>
+              </li>
+            `).join("")}
+          </ul>
+        </div>
+      `;
+    }
+
+    function abrirEstatisticas() {
+      const pedidos = buscarPedidosLocais();
+      if (!pedidos.length) {
+        conteudoStats.innerHTML = `
+          <div class="empty-msg">
+            Nenhum pedido encontrado no armazenamento local deste navegador ainda.<br>
+            Assim que os pedidos chegarem em <strong>VER PEDIDOS</strong>, os indicadores aparecerão aqui automaticamente.
+          </div>
+        `;
+        modal.classList.add("open");
+        return;
+      }
+
+      const stats = calcularEstatisticas(pedidos);
+      conteudoStats.innerHTML = `
+        <div class="kpis">
+          <div class="kpi-card">
+            <div class="kpi-label">Total de Pedidos</div>
+            <div class="kpi-value accent">${stats.total}</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Tocadas / Pendentes</div>
+            <div class="kpi-value success">${stats.tocadas} <span style="font-size:0.9rem;color:var(--muted);font-weight:500;">/ ${stats.pendentes}</span></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Taxa de Atendimento</div>
+            <div class="kpi-value">${stats.taxaAtendimento}%</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Pedidos com Pix</div>
+            <div class="kpi-value accent">${stats.comPix} <span style="font-size:0.85rem;color:var(--muted);font-weight:500;">(${stats.pctPix}%)</span></div>
+          </div>
+        </div>
+        ${renderizarRanking("🏆 Músicas Mais Pedidas", stats.topMusicas)}
+        ${renderizarRanking("🎸 Estilos / Ritmos em Alta", stats.topEstilos)}
+        ${renderizarRanking("⏰ Horários de Pico", stats.topHorarios)}
+      `;
+      modal.classList.add("open");
+    }
+
+    btnAbrir.addEventListener("click", abrirEstatisticas);
+    btnFechar.addEventListener("click", () => modal.classList.remove("open"));
+    modal.addEventListener("click", e => {
+      if (e.target === modal) modal.classList.remove("open");
     });
-  }
-</script>
+  </script>
 </body>
 </html>
