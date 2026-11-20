@@ -1572,7 +1572,7 @@ let activeRequestId = null;
             carregandoPlanilha = true;
 
             try {
-              const resp = await fetch(`${API_REPERTORIO_URL}?action=getRepertorio&t=${Date.now()}`);
+              const resp = await fetch(`${API_REPERTORIO_URL}?action=getRepertorio&modo=cardapio&t=${Date.now()}`);
               const data = await resp.json();
               if (!data || !data.ok || !Array.isArray(data.repertorio)) return;
 
@@ -2236,7 +2236,7 @@ async function inicializarCardapio() {
     applyMediaAssets();
 
     try {
-        const resp = await fetch(`${REPERTORIO_API_URL}?action=getRepertorio&t=${Date.now()}`);
+        const resp = await fetch(`${REPERTORIO_API_URL}?action=getRepertorio&modo=cardapio&t=${Date.now()}`);
         const data = await resp.json();
         if (data && data.ok && Array.isArray(data.repertorio)) {
          const normalizada = normalizarRepertorioExterno(data.repertorio);
