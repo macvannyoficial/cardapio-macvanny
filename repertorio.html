@@ -44,6 +44,13 @@
       border-bottom: 1px solid var(--border);
     }
 
+    .topbar-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
     .back-link {
       display: inline-flex;
       align-items: center;
@@ -136,6 +143,11 @@
       border-color: var(--accent);
     }
 
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
     .btn-primary {
       background: var(--accent);
       color: #111827;
@@ -144,6 +156,11 @@
 
     .btn-primary:hover {
       opacity: 0.92;
+    }
+
+    .btn-import {
+      border-color: rgba(16, 185, 129, 0.45);
+      color: #6ee7b7;
     }
 
     .filters-bar {
@@ -266,7 +283,10 @@
         <h1>Repertório do Painel</h1>
         <p class="subtitle">Incluir músicas, editar nome, artista, estilo e visibilidade</p>
       </div>
-      <button id="btnRecarregar" type="button">Atualizar lista</button>
+      <div class="topbar-actions">
+        <button id="btnImportar" class="btn-import" type="button">📥 Importar músicas do Cardápio</button>
+        <button id="btnRecarregar" type="button">Atualizar lista</button>
+      </div>
     </div>
 
     <section class="panel-box">
@@ -365,9 +385,52 @@
         repertorioCache = Array.isArray(data.repertorio) ? data.repertorio : [];
         atualizarFiltroEstilos();
         renderizarRepertorio();
-        setStatus(`Repertório atualizado às ${new Date().toLocaleTimeString('pt-BR')}.`);
+        setStatus(`Repertório atualizado às ${new Date().toLocaleTimeString('pt-BR')} (${repertorioCache.length} músicas).`);
       } catch (err) {
         setStatus(`Erro: ${err.message}`);
+      }
+    }
+
+    async function importarDoCardapio() {
+      const btn = document.getElementById('btnImportar');
+      btn.disabled = true;
+      setStatus('Lendo as músicas do index.html...');
+
+      try {
+        const respHtml = await fetch(`./index.html?t=${Date.now()}`);
+        if (!respHtml.ok) throw new Error('Não foi possível ler o index.html');
+        const html = await respHtml.text();
+
+        const match = html.match(/const\s+repertorio\s*=\s*(\[[\s\S]*?\]);/);
+        if (!match) {
+          throw new Error('Lista "const repertorio = [...]" não encontrada no index.html');
+        }
+
+        const listaExtraida = (new Function('return ' + match[1]))();
+        if (!Array.isArray(listaExtraida) || !listaExtraida.length) {
+          throw new Error('Nenhuma música encontrada dentro de repertorio');
+        }
+
+        setStatus(`Enviando ${listaExtraida.length} músicas para a planilha (aguarde alguns segundos)...`);
+
+        const respApi = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'importarLote',
+            itens: listaExtraida
+          })
+        });
+
+        const data = await respApi.json();
+        if (!data.ok) throw new Error(data.error || 'Falha ao importar');
+
+        await carregarRepertorio();
+        setStatus(`Importação concluída! ${data.importadas} música(s) nova(s) adicionada(s).`);
+      } catch (err) {
+        setStatus(`Erro na importação: ${err.message}`);
+      } finally {
+        btn.disabled = false;
       }
     }
 
@@ -542,6 +605,7 @@
       }).join('');
     }
 
+    document.getElementById('btnImportar').addEventListener('click', importarDoCardapio);
     document.getElementById('btnRecarregar').addEventListener('click', carregarRepertorio);
     document.getElementById('buscaTexto').addEventListener('input', renderizarRepertorio);
     document.getElementById('filtroEstilo').addEventListener('change', renderizarRepertorio);
