@@ -1,20 +1,20 @@
 {
   "name": "Painel de Pedidos — Modo Palco",
   "short_name": "Painel Palco",
-  "start_url": "https://macvannyoficial.github.io/cardapio-macvanny/painel.html",
-  "scope": "https://macvannyoficial.github.io/cardapio-macvanny/",
+  "start_url": "./painel.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#121212",
   "theme_color": "#121212",
   "icons": [
     {
-      "src": "https://macvannyoficial.github.io/cardapio-macvanny/logo%20mac.jpg?v=5",
+      "src": "./icone.jpg?v=6",
       "sizes": "192x192",
       "type": "image/jpeg",
       "purpose": "any"
     },
     {
-      "src": "https://macvannyoficial.github.io/cardapio-macvanny/logo%20mac.jpg?v=5",
+      "src": "./icone.jpg?v=6",
       "sizes": "512x512",
       "type": "image/jpeg",
       "purpose": "any"
