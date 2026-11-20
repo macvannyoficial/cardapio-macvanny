@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Repertório do Painel — Cardápio Musical</title>
+  <title>Minhas Músicas & Repertórios — Cardápio Musical</title>
   <style>
     :root {
       --bg: #0f1115;
@@ -29,7 +29,7 @@
     }
 
     .container {
-      max-width: 880px;
+      max-width: 920px;
       margin: 0 auto;
     }
 
@@ -39,7 +39,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
       padding-bottom: 14px;
       border-bottom: 1px solid var(--border);
     }
@@ -78,6 +78,37 @@
       font-size: 0.88rem;
       color: var(--muted);
       margin-top: 2px;
+    }
+
+    .mode-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .tab-btn {
+      padding: 10px 16px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--muted);
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: #111827;
+      border-color: var(--accent);
+    }
+
+    .view-section {
+      display: none;
+    }
+
+    .view-section.active {
+      display: block;
     }
 
     .panel-box {
@@ -163,6 +194,16 @@
       color: #6ee7b7;
     }
 
+    .btn-delete {
+      border-color: rgba(239, 68, 68, 0.45);
+      color: #fca5a5;
+    }
+
+    .btn-delete:hover {
+      border-color: #ef4444;
+      background: rgba(239, 68, 68, 0.12);
+    }
+
     .filters-bar {
       display: flex;
       flex-wrap: wrap;
@@ -227,26 +268,6 @@
       gap: 8px;
     }
 
-    .tag-visivel {
-      font-size: 0.75rem;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 999px;
-      color: #34d399;
-      background: rgba(16, 185, 129, 0.14);
-      border: 1px solid rgba(16, 185, 129, 0.35);
-    }
-
-    .tag-oculto {
-      font-size: 0.75rem;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 999px;
-      color: #fca5a5;
-      background: rgba(239, 68, 68, 0.14);
-      border: 1px solid rgba(239, 68, 68, 0.35);
-    }
-
     .edit-box {
       width: 100%;
       margin-top: 12px;
@@ -273,14 +294,154 @@
       text-align: center;
       color: var(--muted);
     }
-    .btn-delete {
-      border-color: rgba(239, 68, 68, 0.45);
-      color: #fca5a5;
+
+    /* Estilos específicos da seção REPERTÓRIOS (10 cardápios) */
+    .slots-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
     }
 
-    .btn-delete:hover {
-      border-color: #ef4444;
-      background: rgba(239, 68, 68, 0.12);
+    .slot-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .slot-card.active-live {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.25);
+    }
+
+    .slot-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .slot-name {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .slot-sub {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .badge-live {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 999px;
+      color: #111827;
+      background: var(--accent);
+      white-space: nowrap;
+    }
+
+    .badge-visivel {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 999px;
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.14);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      white-space: nowrap;
+    }
+
+    .badge-oculto {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 999px;
+      color: var(--muted);
+      background: rgba(156, 163, 175, 0.12);
+      border: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    .slot-info {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .slot-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .checklist-box {
+      max-height: 340px;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      background: var(--bg);
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .check-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: var(--card);
+      border: 1px solid transparent;
+      cursor: pointer;
+    }
+
+    .check-item:hover {
+      border-color: var(--border);
+    }
+
+    .check-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .check-left input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .check-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .check-meta {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .selection-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 12px;
     }
   </style>
 </head>
@@ -289,69 +450,126 @@
     <div class="topbar">
       <div>
         <a class="back-link" href="./painel.html">← Voltar ao Painel</a>
-        <h1>Repertório do Painel</h1>
-        <p class="subtitle">Incluir músicas, editar nome, artista, estilo e visibilidade</p>
+        <h1 id="tituloTopo">Minhas Músicas</h1>
+        <p id="subtituloTopo" class="subtitle">Gerencie seu acervo central de músicas e monte até 10 repertórios para diferentes ambientes</p>
       </div>
       <div class="topbar-actions">
         <button id="btnImportar" class="btn-import" type="button">📥 Importar músicas do Cardápio</button>
-        <button id="btnRecarregar" type="button">Atualizar lista</button>
+        <button id="btnRecarregar" type="button">Atualizar dados</button>
       </div>
     </div>
 
-    <section class="panel-box">
-      <h2>Incluir nova música</h2>
-      <form id="formAddMusica">
-        <div class="form-grid">
-          <div class="field">
-            <label for="addMusica">Nome da música *</label>
-            <input id="addMusica" type="text" placeholder="Ex.: Faz Uma Loucura por Mim" required />
-          </div>
-          <div class="field">
-            <label for="addArtista">Artista</label>
-            <input id="addArtista" type="text" placeholder="Ex.: Alcione" />
-          </div>
-          <div class="field">
-            <label for="addEstilo">Estilo</label>
-            <input id="addEstilo" type="text" placeholder="Ex.: Samba, Pagode, Forró..." />
-          </div>
-          <div class="field">
-            <label for="addVisivel">Visibilidade</label>
-            <select id="addVisivel">
-              <option value="visivel" selected>Visível</option>
-              <option value="nao_visivel">Não Visível</option>
-            </select>
-          </div>
-        </div>
-        <div style="margin-top: 12px;">
-          <button class="btn-primary" type="submit">+ Adicionar música</button>
-        </div>
-      </form>
-    </section>
-
-    <div class="filters-bar">
-      <div class="filters-left">
-        <input id="buscaTexto" type="text" placeholder="Buscar por música, artista ou estilo..." style="max-width: 280px;" />
-        <select id="filtroEstilo" style="max-width: 180px;">
-          <option value="">Todos os estilos</option>
-        </select>
-        <select id="filtroVisivel" style="max-width: 170px;">
-          <option value="todos">Visível e Não Visível</option>
-          <option value="visivel">Apenas Visível</option>
-          <option value="nao_visivel">Apenas Não Visível</option>
-        </select>
-      </div>
-      <div id="contadorMusicas" class="subtitle">0 música(s)</div>
+    <div class="mode-tabs">
+      <button id="tabMinhasMusicas" class="tab-btn active" type="button">Minhas Músicas</button>
+      <button id="tabRepertorios" class="tab-btn" type="button">REPERTÓRIOS (10)</button>
     </div>
 
     <div id="statusMsg" class="status-msg"></div>
-    <div id="listaRepertorio" class="list"></div>
+
+    <!-- ABA 1: MINHAS MÚSICAS -->
+    <section id="viewMinhasMusicas" class="view-section active">
+      <section class="panel-box">
+        <h2>Incluir nova música em Minhas Músicas</h2>
+        <form id="formAddMusica">
+          <div class="form-grid">
+            <div class="field">
+              <label for="addMusica">Nome da música *</label>
+              <input id="addMusica" type="text" placeholder="Ex.: Faz Uma Loucura por Mim" required />
+            </div>
+            <div class="field">
+              <label for="addArtista">Artista</label>
+              <input id="addArtista" type="text" placeholder="Ex.: Alcione" />
+            </div>
+            <div class="field">
+              <label for="addEstilo">Estilo</label>
+              <input id="addEstilo" type="text" placeholder="Ex.: Samba, Pagode, Forró..." />
+            </div>
+          </div>
+          <div style="margin-top: 12px;">
+            <button class="btn-primary" type="submit">+ Adicionar música</button>
+          </div>
+        </form>
+      </section>
+
+      <div class="filters-bar">
+        <div class="filters-left">
+          <input id="buscaTexto" type="text" placeholder="Buscar por música, artista ou estilo..." style="max-width: 300px;" />
+          <select id="filtroEstilo" style="max-width: 200px;">
+            <option value="">Todos os estilos</option>
+          </select>
+        </div>
+        <div id="contadorMusicas" class="subtitle">0 música(s)</div>
+      </div>
+
+      <div id="listaRepertorio" class="list"></div>
+    </section>
+
+    <!-- ABA 2: REPERTÓRIOS (ATÉ 10 CARDÁPIOS) -->
+    <section id="viewRepertorios" class="view-section">
+      <section class="panel-box">
+        <h2>Resumo dos 10 Repertórios</h2>
+        <p class="subtitle" style="margin-bottom: 14px;">
+          Monte até 10 cardápios para diferentes ambientes. Quando mais de um estiver marcado como <strong>Visível</strong>, o que foi atualizado mais recentemente aparece para o público.
+        </p>
+        <div id="resumoSlots" class="slots-summary-grid"></div>
+      </section>
+
+      <section id="editorSlotBox" class="panel-box">
+        <h2 id="tituloEditorSlot">Configurar Repertório</h2>
+        <div class="form-grid">
+          <div class="field">
+            <label for="slotSelect">Escolha o Repertório (1 a 10)</label>
+            <select id="slotSelect"></select>
+          </div>
+          <div class="field">
+            <label for="slotNome">Nome do Cardápio / Repertório</label>
+            <input id="slotNome" type="text" placeholder="Ex.: Bar MPB, Pub Rock, Forró..." />
+          </div>
+          <div class="field">
+            <label for="slotAmbiente">Ambiente / Ocasião</label>
+            <input id="slotAmbiente" type="text" placeholder="Ex.: Ambiente calmo, Jantar, Noite animada..." />
+          </div>
+          <div class="field">
+            <label for="slotVisivel">Visibilidade para o público</label>
+            <select id="slotVisivel">
+              <option value="nao">Oculto (Não visível no público)</option>
+              <option value="sim">Visível (Candidato a ir ao ar)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="selection-bar">
+          <div class="filters-left">
+            <input id="buscaSlotMusicas" type="text" placeholder="Filtrar músicas para incluir neste repertório..." style="max-width: 280px;" />
+            <select id="filtroEstiloSlot" style="max-width: 190px;">
+              <option value="">Todos os estilos</option>
+            </select>
+          </div>
+          <div class="topbar-actions">
+            <button id="btnMarcarFiltradas" type="button">Marcar filtradas</button>
+            <button id="btnLimparSelecaoSlot" type="button">Limpar seleção</button>
+            <span id="contadorSelecionadasSlot" class="subtitle">0 selecionada(s)</span>
+          </div>
+        </div>
+
+        <div id="checklistMusicasSlot" class="checklist-box"></div>
+
+        <div class="edit-actions" style="margin-top: 14px;">
+          <button id="btnSalvarSlot" class="btn-primary" type="button">Salvar Repertório</button>
+        </div>
+      </section>
+    </section>
   </main>
 
   <script>
     const API_URL = 'https://script.google.com/macros/s/AKfycbyWx02nFN3Y8EFe8N6NzIiK_TSI6OijZrQfmfsPQi-eJdNw9U_1ICEjVCRH3lC9l_1c/exec';
 
     let repertorioCache = [];
+    let repertoriosSlotsCache = [];
+    let ativoIdCache = null;
     let editandoId = null;
+    let slotSelecionadoId = 'slot_1';
+    let idsSelecionadosNoEditor = new Set();
 
     function escapeHtml(str) {
       return String(str || '')
@@ -366,38 +584,86 @@
       document.getElementById('statusMsg').textContent = msg;
     }
 
-    function atualizarFiltroEstilos() {
-      const selectEstilo = document.getElementById('filtroEstilo');
-      const valorAtual = selectEstilo.value;
+    function formatarDataHora(isoStr) {
+      if (!isoStr) return 'Sem atualização';
+      const d = new Date(isoStr);
+      if (isNaN(d.getTime())) return isoStr;
+      return d.toLocaleString('pt-BR', { timeZone: 'America/Recife' });
+    }
 
+    function trocarAba(aba) {
+      const isMusicas = aba === 'musicas';
+      document.getElementById('tabMinhasMusicas').classList.toggle('active', isMusicas);
+      document.getElementById('tabRepertorios').classList.toggle('active', !isMusicas);
+      document.getElementById('viewMinhasMusicas').classList.toggle('active', isMusicas);
+      document.getElementById('viewRepertorios').classList.toggle('active', !isMusicas);
+
+      document.getElementById('tituloTopo').textContent = isMusicas ? 'Minhas Músicas' : 'REPERTÓRIOS';
+      document.getElementById('subtituloTopo').textContent = isMusicas
+        ? 'Cadastre, edite e exclua músicas do seu acervo central'
+        : 'Gerencie até 10 cardápios para diferentes ambientes e defina qual fica visível ao público';
+    }
+
+    function atualizarFiltroEstilos() {
       const estilos = [...new Set(
         repertorioCache
           .map(item => String(item.estilo || '').trim())
           .filter(Boolean)
       )].sort((a, b) => a.localeCompare(b, 'pt-BR'));
 
-      selectEstilo.innerHTML = '<option value="">Todos os estilos</option>' +
+      const selectFiltro = document.getElementById('filtroEstilo');
+      const valorAtualFiltro = selectFiltro.value;
+      selectFiltro.innerHTML = '<option value="">Todos os estilos</option>' +
         estilos.map(est => `<option value="${escapeHtml(est)}">${escapeHtml(est)}</option>`).join('');
+      if (estilos.includes(valorAtualFiltro)) {
+        selectFiltro.value = valorAtualFiltro;
+      }
 
-      if (estilos.includes(valorAtual)) {
-        selectEstilo.value = valorAtual;
+      const selectSlotFiltro = document.getElementById('filtroEstiloSlot');
+      const valorAtualSlotFiltro = selectSlotFiltro.value;
+      selectSlotFiltro.innerHTML = '<option value="">Todos os estilos</option>' +
+        estilos.map(est => `<option value="${escapeHtml(est)}">${escapeHtml(est)}</option>`).join('');
+      if (estilos.includes(valorAtualSlotFiltro)) {
+        selectSlotFiltro.value = valorAtualSlotFiltro;
       }
     }
 
     async function carregarRepertorio() {
-      setStatus('Carregando repertório...');
+      setStatus('Carregando Minhas Músicas...');
       try {
         const resp = await fetch(`${API_URL}?action=getRepertorio&t=${Date.now()}`);
         const data = await resp.json();
-        if (!data.ok) throw new Error(data.error || 'Erro ao carregar repertório');
+        if (!data.ok) throw new Error(data.error || 'Erro ao carregar músicas');
 
         repertorioCache = Array.isArray(data.repertorio) ? data.repertorio : [];
         atualizarFiltroEstilos();
         renderizarRepertorio();
-        setStatus(`Repertório atualizado às ${new Date().toLocaleTimeString('pt-BR')} (${repertorioCache.length} músicas).`);
+        renderizarChecklistSlot();
+        setStatus(`Minhas Músicas atualizadas às ${new Date().toLocaleTimeString('pt-BR')} (${repertorioCache.length} música(s)).`);
       } catch (err) {
         setStatus(`Erro: ${err.message}`);
       }
+    }
+
+    async function carregarRepertoriosSlots() {
+      try {
+        const resp = await fetch(`${API_URL}?action=getRepertorios&t=${Date.now()}`);
+        const data = await resp.json();
+        if (!data.ok) throw new Error(data.error || 'Erro ao carregar repertórios');
+
+        repertoriosSlotsCache = Array.isArray(data.repertorios) ? data.repertorios : [];
+        ativoIdCache = data.ativoId || null;
+
+        preencherSeletorSlots();
+        renderizarResumoSlots();
+        carregarSlotNoEditor(slotSelecionadoId);
+      } catch (err) {
+        setStatus(`Erro ao carregar repertórios: ${err.message}`);
+      }
+    }
+
+    async function atualizarTudo() {
+      await Promise.all([carregarRepertorio(), carregarRepertoriosSlots()]);
     }
 
     async function importarDoCardapio() {
@@ -435,7 +701,7 @@
         if (!data.ok) throw new Error(data.error || 'Falha ao importar');
 
         await carregarRepertorio();
-        setStatus(`Importação concluída! ${data.importadas} música(s) nova(s) adicionada(s).`);
+        setStatus(`Importação concluída! ${data.importadas} música(s) nova(s) adicionada(s) em Minhas Músicas.`);
       } catch (err) {
         setStatus(`Erro na importação: ${err.message}`);
       } finally {
@@ -448,17 +714,16 @@
       const musica = document.getElementById('addMusica').value.trim();
       const artista = document.getElementById('addArtista').value.trim();
       const estilo = document.getElementById('addEstilo').value.trim();
-      const visivel = document.getElementById('addVisivel').value;
 
       if (!musica) return;
-      setStatus('Adicionando música...');
+      setStatus('Adicionando música em Minhas Músicas...');
 
       try {
         const url = `${API_URL}?action=addMusica`
           + `&musica=${encodeURIComponent(musica)}`
           + `&artista=${encodeURIComponent(artista)}`
           + `&estilo=${encodeURIComponent(estilo)}`
-          + `&visivel=${encodeURIComponent(visivel)}`
+          + `&visivel=visivel`
           + `&t=${Date.now()}`;
 
         const resp = await fetch(url);
@@ -467,7 +732,7 @@
 
         document.getElementById('formAddMusica').reset();
         await carregarRepertorio();
-        setStatus(`Música "${musica}" adicionada.`);
+        setStatus(`Música "${musica}" adicionada em Minhas Músicas.`);
       } catch (err) {
         setStatus(`Erro ao adicionar: ${err.message}`);
       }
@@ -482,7 +747,6 @@
       const musica = document.getElementById(`edit-musica-${id}`).value.trim();
       const artista = document.getElementById(`edit-artista-${id}`).value.trim();
       const estilo = document.getElementById(`edit-estilo-${id}`).value.trim();
-      const visivel = document.getElementById(`edit-visivel-${id}`).value;
 
       if (!musica) {
         setStatus('O nome da música não pode ficar vazio.');
@@ -496,7 +760,6 @@
           + `&musica=${encodeURIComponent(musica)}`
           + `&artista=${encodeURIComponent(artista)}`
           + `&estilo=${encodeURIComponent(estilo)}`
-          + `&visivel=${encodeURIComponent(visivel)}`
           + `&t=${Date.now()}`;
 
         const resp = await fetch(url);
@@ -511,26 +774,9 @@
       }
     }
 
-    async function alternarVisibilidade(id) {
-      setStatus('Atualizando visibilidade...');
-      try {
-        const url = `${API_URL}?action=toggleVisivel&id=${encodeURIComponent(id)}&t=${Date.now()}`;
-        const resp = await fetch(url);
-        const data = await resp.json();
-        if (!data.ok) throw new Error(data.error || 'Falha ao alterar visibilidade');
-
-        repertorioCache = repertorioCache.map(item =>
-          String(item.id) === String(id) ? { ...item, visivel: data.visivel } : item
-        );
-        renderizarRepertorio();
-        setStatus(`Visibilidade alterada para ${data.visivel === 'visivel' ? 'Visível' : 'Não Visível'}.`);
-      } catch (err) {
-        setStatus(`Erro: ${err.message}`);
-      }
-    }
     async function deletarMusica(id, titulo) {
       const nomeExibicao = titulo ? `"${titulo}"` : 'esta música';
-      const confirmou = confirm(`Tem certeza que deseja deletar ${nomeExibicao} do repertório?`);
+      const confirmou = confirm(`Tem certeza que deseja deletar ${nomeExibicao} de Minhas Músicas?`);
       if (!confirmou) return;
 
       setStatus('Deletando música...');
@@ -546,7 +792,8 @@
         repertorioCache = repertorioCache.filter(item => String(item.id) !== String(id));
         atualizarFiltroEstilos();
         renderizarRepertorio();
-        setStatus(`Música ${nomeExibicao} removida do repertório.`);
+        renderizarChecklistSlot();
+        setStatus(`Música ${nomeExibicao} removida de Minhas Músicas.`);
       } catch (err) {
         setStatus(`Erro ao deletar: ${err.message}`);
       }
@@ -557,13 +804,9 @@
       const contador = document.getElementById('contadorMusicas');
       const busca = document.getElementById('buscaTexto').value.trim().toLowerCase();
       const estiloFiltro = document.getElementById('filtroEstilo').value;
-      const visivelFiltro = document.getElementById('filtroVisivel').value;
 
       const filtrados = repertorioCache.filter(item => {
-        const vis = item.visivel === 'nao_visivel' ? 'nao_visivel' : 'visivel';
-        if (visivelFiltro !== 'todos' && vis !== visivelFiltro) return false;
         if (estiloFiltro && String(item.estilo || '').trim() !== estiloFiltro) return false;
-
         if (busca) {
           const alvo = `${item.musica || ''} ${item.artista || ''} ${item.estilo || ''}`.toLowerCase();
           if (!alvo.includes(busca)) return false;
@@ -574,12 +817,11 @@
       contador.textContent = `${filtrados.length} música(s)`;
 
       if (!filtrados.length) {
-        container.innerHTML = '<div class="empty">Nenhuma música encontrada no repertório.</div>';
+        container.innerHTML = '<div class="empty">Nenhuma música encontrada em Minhas Músicas.</div>';
         return;
       }
 
       container.innerHTML = filtrados.map(item => {
-        const isVisivel = item.visivel !== 'nao_visivel';
         const isEditing = String(editandoId) === String(item.id);
         const safeId = escapeHtml(item.id);
 
@@ -594,12 +836,6 @@
             </div>
 
             <div class="song-right">
-              <span class="${isVisivel ? 'tag-visivel' : 'tag-oculto'}">
-                ${isVisivel ? 'Visível' : 'Não Visível'}
-              </span>
-              <button type="button" onclick="alternarVisibilidade('${safeId}')">
-                ${isVisivel ? 'Deixar Não Visível' : 'Deixar Visível'}
-              </button>
               <button type="button" onclick="abrirEdicao('${safeId}')">
                 ${isEditing ? 'Fechar' : 'Editar'}
               </button>
@@ -622,13 +858,6 @@
                   <label>Estilo</label>
                   <input id="edit-estilo-${safeId}" type="text" value="${escapeHtml(item.estilo)}" />
                 </div>
-                <div class="field">
-                  <label>Visibilidade</label>
-                  <select id="edit-visivel-${safeId}">
-                    <option value="visivel" ${isVisivel ? 'selected' : ''}>Visível</option>
-                    <option value="nao_visivel" ${!isVisivel ? 'selected' : ''}>Não Visível</option>
-                  </select>
-                </div>
               </div>
               <div class="edit-actions">
                 <button class="btn-primary" type="button" onclick="salvarEdicao('${safeId}')">Salvar alterações</button>
@@ -640,13 +869,236 @@
       }).join('');
     }
 
+    /* --- FUNÇÕES DOS 10 REPERTÓRIOS --- */
+    function preencherSeletorSlots() {
+      const sel = document.getElementById('slotSelect');
+      sel.innerHTML = repertoriosSlotsCache.map((slot, idx) => {
+        const label = `Slot ${idx + 1} — ${slot.nome || ('Repertório ' + (idx + 1))}`;
+        return `<option value="${escapeHtml(slot.id)}">${escapeHtml(label)}</option>`;
+      }).join('');
+      sel.value = slotSelecionadoId;
+    }
+
+    function renderizarResumoSlots() {
+      const grid = document.getElementById('resumoSlots');
+      if (!repertoriosSlotsCache.length) {
+        grid.innerHTML = '<div class="empty">Carregando os 10 repertórios...</div>';
+        return;
+      }
+
+      grid.innerHTML = repertoriosSlotsCache.map((slot, idx) => {
+        const isLive = ativoIdCache && String(ativoIdCache) === String(slot.id);
+        const isVisivel = Boolean(slot.visivel);
+        const badgeHtml = isLive
+          ? '<span class="badge-live">NO AR AGORA</span>'
+          : (isVisivel
+              ? '<span class="badge-visivel">Visível</span>'
+              : '<span class="badge-oculto">Oculto</span>');
+
+        return `
+          <article class="slot-card ${isLive ? 'active-live' : ''}">
+            <div>
+              <div class="slot-top">
+                <div>
+                  <div class="slot-name">${idx + 1}. ${escapeHtml(slot.nome || ('Repertório ' + (idx + 1)))}</div>
+                  <div class="slot-sub">${slot.ambiente ? escapeHtml(slot.ambiente) : 'Ambiente não definido'}</div>
+                </div>
+                ${badgeHtml}
+              </div>
+              <div class="slot-info" style="margin-top: 10px;">
+                <strong>${Number(slot.quantidade || 0)}</strong> música(s) incluída(s)<br/>
+                Atualizado: ${escapeHtml(formatarDataHora(slot.atualizado_em))}
+              </div>
+            </div>
+            <div class="slot-actions">
+              <button type="button" onclick="selecionarSlotParaEditar('${escapeHtml(slot.id)}')">Editar / Montar</button>
+              <button type="button" onclick="alternarVisibilidadeSlot('${escapeHtml(slot.id)}', ${!isVisivel})">
+                ${isVisivel ? 'Ocultar' : 'Tornar Visível'}
+              </button>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    function selecionarSlotParaEditar(slotId) {
+      slotSelecionadoId = slotId;
+      document.getElementById('slotSelect').value = slotId;
+      carregarSlotNoEditor(slotId);
+      document.getElementById('editorSlotBox').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function carregarSlotNoEditor(slotId) {
+      const slot = repertoriosSlotsCache.find(s => String(s.id) === String(slotId));
+      if (!slot) return;
+
+      document.getElementById('tituloEditorSlot').textContent =
+        `Configurar — ${slot.nome || slot.id}`;
+      document.getElementById('slotNome').value = slot.nome || '';
+      document.getElementById('slotAmbiente').value = slot.ambiente || '';
+      document.getElementById('slotVisivel').value = slot.visivel ? 'sim' : 'nao';
+
+      idsSelecionadosNoEditor = new Set((slot.musicas_ids || []).map(String));
+      renderizarChecklistSlot();
+    }
+
+    function atualizarContadorSelecionadasSlot() {
+      document.getElementById('contadorSelecionadasSlot').textContent =
+        `${idsSelecionadosNoEditor.size} selecionada(s)`;
+    }
+
+    function renderizarChecklistSlot() {
+      const box = document.getElementById('checklistMusicasSlot');
+      const busca = document.getElementById('buscaSlotMusicas').value.trim().toLowerCase();
+      const estiloFiltro = document.getElementById('filtroEstiloSlot').value;
+
+      atualizarContadorSelecionadasSlot();
+
+      if (!repertorioCache.length) {
+        box.innerHTML = '<div class="empty">Nenhuma música cadastrada em Minhas Músicas ainda.</div>';
+        return;
+      }
+
+      const filtradas = repertorioCache.filter(item => {
+        if (estiloFiltro && String(item.estilo || '').trim() !== estiloFiltro) return false;
+        if (busca) {
+          const alvo = `${item.musica || ''} ${item.artista || ''} ${item.estilo || ''}`.toLowerCase();
+          if (!alvo.includes(busca)) return false;
+        }
+        return true;
+      });
+
+      if (!filtradas.length) {
+        box.innerHTML = '<div class="empty">Nenhuma música corresponde ao filtro.</div>';
+        return;
+      }
+
+      box.innerHTML = filtradas.map(item => {
+        const idStr = String(item.id);
+        const checked = idsSelecionadosNoEditor.has(idStr) ? 'checked' : '';
+        return `
+          <label class="check-item">
+            <div class="check-left">
+              <input type="checkbox" value="${escapeHtml(idStr)}" ${checked} onchange="toggleMusicaNoSlot(this.value, this.checked)" />
+              <div>
+                <div class="check-title">${escapeHtml(item.musica)}</div>
+                <div class="check-meta">
+                  ${item.artista ? escapeHtml(item.artista) : 'Sem artista'}
+                  ${item.estilo ? ` • ${escapeHtml(item.estilo)}` : ''}
+                </div>
+              </div>
+            </div>
+          </label>
+        `;
+      }).join('');
+    }
+
+    function toggleMusicaNoSlot(musicaId, checked) {
+      const idStr = String(musicaId);
+      if (checked) {
+        idsSelecionadosNoEditor.add(idStr);
+      } else {
+        idsSelecionadosNoEditor.delete(idStr);
+      }
+      atualizarContadorSelecionadasSlot();
+    }
+
+    function marcarFiltradasNoSlot() {
+      const busca = document.getElementById('buscaSlotMusicas').value.trim().toLowerCase();
+      const estiloFiltro = document.getElementById('filtroEstiloSlot').value;
+
+      repertorioCache.forEach(item => {
+        if (estiloFiltro && String(item.estilo || '').trim() !== estiloFiltro) return;
+        if (busca) {
+          const alvo = `${item.musica || ''} ${item.artista || ''} ${item.estilo || ''}`.toLowerCase();
+          if (!alvo.includes(busca)) return;
+        }
+        idsSelecionadosNoEditor.add(String(item.id));
+      });
+      renderizarChecklistSlot();
+    }
+
+    function limparSelecaoSlot() {
+      idsSelecionadosNoEditor.clear();
+      renderizarChecklistSlot();
+    }
+
+    async function salvarRepertorioSlot() {
+      const btn = document.getElementById('btnSalvarSlot');
+      btn.disabled = true;
+      setStatus('Salvando repertório...');
+
+      const nome = document.getElementById('slotNome').value.trim() || slotSelecionadoId;
+      const ambiente = document.getElementById('slotAmbiente').value.trim();
+      const visivel = document.getElementById('slotVisivel').value === 'sim';
+      const musicasIds = Array.from(idsSelecionadosNoEditor);
+
+      try {
+        const resp = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'salvarRepertorio',
+            id: slotSelecionadoId,
+            nome: nome,
+            ambiente: ambiente,
+            musicas_ids: musicasIds,
+            visivel: visivel
+          })
+        });
+
+        const data = await resp.json();
+        if (!data.ok) throw new Error(data.error || 'Falha ao salvar repertório');
+
+        await carregarRepertoriosSlots();
+        setStatus(`Repertório "${nome}" salvo com sucesso!`);
+      } catch (err) {
+        setStatus(`Erro ao salvar repertório: ${err.message}`);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    async function alternarVisibilidadeSlot(slotId, novoVisivel) {
+      setStatus('Atualizando visibilidade do repertório...');
+      try {
+        const resp = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'salvarRepertorio',
+            id: slotId,
+            visivel: Boolean(novoVisivel)
+          })
+        });
+
+        const data = await resp.json();
+        if (!data.ok) throw new Error(data.error || 'Falha ao alterar visibilidade');
+
+        await carregarRepertoriosSlots();
+        setStatus(`Visibilidade do repertório atualizada!`);
+      } catch (err) {
+        setStatus(`Erro ao atualizar visibilidade: ${err.message}`);
+      }
+    }
+
+    document.getElementById('tabMinhasMusicas').addEventListener('click', () => trocarAba('musicas'));
+    document.getElementById('tabRepertorios').addEventListener('click', () => trocarAba('repertorios'));
     document.getElementById('btnImportar').addEventListener('click', importarDoCardapio);
-    document.getElementById('btnRecarregar').addEventListener('click', carregarRepertorio);
+    document.getElementById('btnRecarregar').addEventListener('click', atualizarTudo);
     document.getElementById('buscaTexto').addEventListener('input', renderizarRepertorio);
     document.getElementById('filtroEstilo').addEventListener('change', renderizarRepertorio);
-    document.getElementById('filtroVisivel').addEventListener('change', renderizarRepertorio);
+    document.getElementById('slotSelect').addEventListener('change', (e) => {
+      slotSelecionadoId = e.target.value;
+      carregarSlotNoEditor(slotSelecionadoId);
+    });
+    document.getElementById('buscaSlotMusicas').addEventListener('input', renderizarChecklistSlot);
+    document.getElementById('filtroEstiloSlot').addEventListener('change', renderizarChecklistSlot);
+    document.getElementById('btnMarcarFiltradas').addEventListener('click', marcarFiltradasNoSlot);
+    document.getElementById('btnLimparSelecaoSlot').addEventListener('click', limparSelecaoSlot);
+    document.getElementById('btnSalvarSlot').addEventListener('click', salvarRepertorioSlot);
 
-    carregarRepertorio();
+    atualizarTudo();
   </script>
 </body>
 </html>
