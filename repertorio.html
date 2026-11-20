@@ -282,6 +282,7 @@
 
     .edit-actions {
       display: flex;
+      flex-wrap: wrap;
       gap: 8px;
       margin-top: 10px;
     }
@@ -295,7 +296,6 @@
       color: var(--muted);
     }
 
-    /* Estilos específicos da seção REPERTÓRIOS (10 cardápios) */
     .slots-summary-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -443,6 +443,74 @@
       gap: 8px;
       margin-top: 12px;
     }
+
+    /* Visualização de músicas e estilos selecionados */
+    .inspector-box {
+      background: var(--card);
+      border: 1px solid var(--accent);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 18px;
+      display: none;
+    }
+
+    .inspector-box.open {
+      display: block;
+    }
+
+    .inspector-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .inspector-section-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-top: 10px;
+      margin-bottom: 8px;
+    }
+
+    .styles-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .style-chip {
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: rgba(245, 158, 11, 0.14);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.35);
+    }
+
+    .selected-songs-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 360px;
+      overflow-y: auto;
+    }
+
+    .selected-song-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+    }
   </style>
 </head>
 <body>
@@ -514,6 +582,23 @@
         <div id="resumoSlots" class="slots-summary-grid"></div>
       </section>
 
+      <!-- VISUALIZAÇÃO DE MÚSICAS E ESTILOS SELECIONADOS -->
+      <section id="painelInspecaoSlot" class="inspector-box">
+        <div class="inspector-header">
+          <div>
+            <h2 id="tituloInspecao" style="margin-bottom: 2px;">Músicas e Estilos Selecionados</h2>
+            <p id="subtituloInspecao" class="subtitle"></p>
+          </div>
+          <button id="btnFecharInspecao" type="button">Fechar</button>
+        </div>
+
+        <div class="inspector-section-title">Estilos selecionados neste repertório</div>
+        <div id="estilosSelecionadosLista" class="styles-chips"></div>
+
+        <div class="inspector-section-title">Músicas selecionadas neste repertório</div>
+        <div id="musicasSelecionadasLista" class="selected-songs-list"></div>
+      </section>
+
       <section id="editorSlotBox" class="panel-box">
         <h2 id="tituloEditorSlot">Configurar Repertório</h2>
         <div class="form-grid">
@@ -556,6 +641,7 @@
 
         <div class="edit-actions" style="margin-top: 14px;">
           <button id="btnSalvarSlot" class="btn-primary" type="button">Salvar Repertório</button>
+          <button id="btnVerSelecionadosEditor" type="button">Ver músicas e estilos selecionados</button>
         </div>
       </section>
     </section>
@@ -569,6 +655,7 @@
     let ativoIdCache = null;
     let editandoId = null;
     let slotSelecionadoId = 'slot_1';
+    let slotInspecionadoId = null;
     let idsSelecionadosNoEditor = new Set();
 
     function escapeHtml(str) {
@@ -639,6 +726,9 @@
         atualizarFiltroEstilos();
         renderizarRepertorio();
         renderizarChecklistSlot();
+        if (slotInspecionadoId) {
+          renderizarInspecaoSlot(slotInspecionadoId);
+        }
         setStatus(`Minhas Músicas atualizadas às ${new Date().toLocaleTimeString('pt-BR')} (${repertorioCache.length} música(s)).`);
       } catch (err) {
         setStatus(`Erro: ${err.message}`);
@@ -657,6 +747,9 @@
         preencherSeletorSlots();
         renderizarResumoSlots();
         carregarSlotNoEditor(slotSelecionadoId);
+        if (slotInspecionadoId) {
+          renderizarInspecaoSlot(slotInspecionadoId);
+        }
       } catch (err) {
         setStatus(`Erro ao carregar repertórios: ${err.message}`);
       }
@@ -912,6 +1005,7 @@
             </div>
             <div class="slot-actions">
               <button type="button" onclick="selecionarSlotParaEditar('${escapeHtml(slot.id)}')">Editar / Montar</button>
+              <button type="button" onclick="verMusicasEEstilos('${escapeHtml(slot.id)}')">Ver músicas e estilos</button>
               <button type="button" onclick="alternarVisibilidadeSlot('${escapeHtml(slot.id)}', ${!isVisivel})">
                 ${isVisivel ? 'Ocultar' : 'Tornar Visível'}
               </button>
@@ -940,6 +1034,106 @@
 
       idsSelecionadosNoEditor = new Set((slot.musicas_ids || []).map(String));
       renderizarChecklistSlot();
+    }
+
+    function verMusicasEEstilos(slotId) {
+      slotInspecionadoId = slotId;
+      document.getElementById('painelInspecaoSlot').classList.add('open');
+      renderizarInspecaoSlot(slotId);
+      document.getElementById('painelInspecaoSlot').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function verSelecionadosDoEditorAtual() {
+      const slot = repertoriosSlotsCache.find(s => String(s.id) === String(slotSelecionadoId));
+      const nomeAtual = document.getElementById('slotNome').value.trim() || (slot ? slot.nome : slotSelecionadoId);
+      const ambienteAtual = document.getElementById('slotAmbiente').value.trim() || (slot ? slot.ambiente : '');
+      const idsAtuais = Array.from(idsSelecionadosNoEditor);
+
+      slotInspecionadoId = '__editor_atual__';
+      document.getElementById('painelInspecaoSlot').classList.add('open');
+      renderizarDadosInspecao({
+        nome: nomeAtual,
+        ambiente: ambienteAtual,
+        ids: idsAtuais,
+        permitirRemover: true
+      });
+      document.getElementById('painelInspecaoSlot').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function renderizarInspecaoSlot(slotId) {
+      if (slotId === '__editor_atual__') {
+        verSelecionadosDoEditorAtual();
+        return;
+      }
+      const slot = repertoriosSlotsCache.find(s => String(s.id) === String(slotId));
+      if (!slot) return;
+
+      renderizarDadosInspecao({
+        nome: slot.nome || slot.id,
+        ambiente: slot.ambiente || '',
+        ids: slot.musicas_ids || [],
+        permitirRemover: false
+      });
+    }
+
+    function renderizarDadosInspecao({ nome, ambiente, ids, permitirRemover }) {
+      const mapaMusicas = new Map(repertorioCache.map(m => [String(m.id), m]));
+      const selecionadas = (ids || [])
+        .map(id => mapaMusicas.get(String(id)))
+        .filter(Boolean);
+
+      const contagemEstilos = new Map();
+      selecionadas.forEach(m => {
+        const est = String(m.estilo || '').trim() || 'Sem estilo';
+        contagemEstilos.set(est, (contagemEstilos.get(est) || 0) + 1);
+      });
+
+      const estilosOrdenados = Array.from(contagemEstilos.entries())
+        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'pt-BR'));
+
+      document.getElementById('tituloInspecao').textContent = `Músicas e Estilos — ${nome}`;
+      document.getElementById('subtituloInspecao').textContent =
+        `${ambiente ? `Ambiente: ${ambiente} • ` : ''}${selecionadas.length} música(s) • ${estilosOrdenados.length} estilo(s)`;
+
+      const estilosEl = document.getElementById('estilosSelecionadosLista');
+      if (!estilosOrdenados.length) {
+        estilosEl.innerHTML = '<span class="subtitle">Nenhum estilo selecionado ainda.</span>';
+      } else {
+        estilosEl.innerHTML = estilosOrdenados
+          .map(([est, qtd]) => `<span class="style-chip">${escapeHtml(est)} (${qtd})</span>`)
+          .join('');
+      }
+
+      const musicasEl = document.getElementById('musicasSelecionadasLista');
+      if (!selecionadas.length) {
+        musicasEl.innerHTML = '<div class="empty">Nenhuma música selecionada neste repertório ainda.</div>';
+      } else {
+        musicasEl.innerHTML = selecionadas.map((m, idx) => `
+          <div class="selected-song-row">
+            <div>
+              <div class="check-title">${idx + 1}. ${escapeHtml(m.musica)}</div>
+              <div class="check-meta">
+                ${m.artista ? escapeHtml(m.artista) : 'Sem artista'}
+                ${m.estilo ? ` • <strong>${escapeHtml(m.estilo)}</strong>` : ''}
+              </div>
+            </div>
+            ${permitirRemover
+              ? `<button type="button" onclick="removerDoEditorAtual('${escapeHtml(String(m.id))}')">Remover</button>`
+              : ''}
+          </div>
+        `).join('');
+      }
+    }
+
+    function removerDoEditorAtual(musicaId) {
+      idsSelecionadosNoEditor.delete(String(musicaId));
+      renderizarChecklistSlot();
+      verSelecionadosDoEditorAtual();
+    }
+
+    function fecharInspecao() {
+      slotInspecionadoId = null;
+      document.getElementById('painelInspecaoSlot').classList.remove('open');
     }
 
     function atualizarContadorSelecionadasSlot() {
@@ -1001,6 +1195,9 @@
         idsSelecionadosNoEditor.delete(idStr);
       }
       atualizarContadorSelecionadasSlot();
+      if (slotInspecionadoId === '__editor_atual__') {
+        verSelecionadosDoEditorAtual();
+      }
     }
 
     function marcarFiltradasNoSlot() {
@@ -1016,11 +1213,17 @@
         idsSelecionadosNoEditor.add(String(item.id));
       });
       renderizarChecklistSlot();
+      if (slotInspecionadoId === '__editor_atual__') {
+        verSelecionadosDoEditorAtual();
+      }
     }
 
     function limparSelecaoSlot() {
       idsSelecionadosNoEditor.clear();
       renderizarChecklistSlot();
+      if (slotInspecionadoId === '__editor_atual__') {
+        verSelecionadosDoEditorAtual();
+      }
     }
 
     async function salvarRepertorioSlot() {
@@ -1097,6 +1300,8 @@
     document.getElementById('btnMarcarFiltradas').addEventListener('click', marcarFiltradasNoSlot);
     document.getElementById('btnLimparSelecaoSlot').addEventListener('click', limparSelecaoSlot);
     document.getElementById('btnSalvarSlot').addEventListener('click', salvarRepertorioSlot);
+    document.getElementById('btnVerSelecionadosEditor').addEventListener('click', verSelecionadosDoEditorAtual);
+    document.getElementById('btnFecharInspecao').addEventListener('click', fecharInspecao);
 
     atualizarTudo();
   </script>
