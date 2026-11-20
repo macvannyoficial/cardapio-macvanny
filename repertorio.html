@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Repertório do Painel — Cardápio Musical</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --card: #171a21;
+      --border: #262b36;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --accent: #f59e0b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 20px 14px 56px;
+    }
+
+    .container {
+      max-width: 880px;
+      margin: 0 auto;
+    }
+
+    .topbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text);
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 8px 12px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 0.88rem;
+      margin-bottom: 8px;
+    }
+
+    .back-link:hover {
+      border-color: var(--accent);
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      color: var(--accent);
+    }
+
+    .subtitle {
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .panel-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 18px;
+    }
+
+    .panel-box h2 {
+      font-size: 1.05rem;
+      margin-bottom: 12px;
+      color: var(--accent);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    label {
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    input, select {
+      width: 100%;
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 11px;
+      font-size: 0.9rem;
+      font-family: inherit;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    button {
+      font-family: inherit;
+      cursor: pointer;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      padding: 8px 12px;
+      font-size: 0.86rem;
+      font-weight: 600;
+    }
+
+    button:hover {
+      border-color: var(--accent);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #111827;
+      border-color: var(--accent);
+    }
+
+    .btn-primary:hover {
+      opacity: 0.92;
+    }
+
+    .filters-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .filters-left {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .status-msg {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 12px;
+      min-height: 20px;
+    }
+
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .song-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .song-title {
+      font-size: 1.04rem;
+      font-weight: 700;
+    }
+
+    .song-meta {
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    .song-meta strong {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .song-right {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tag-visivel {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.14);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+
+    .tag-oculto {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      color: #fca5a5;
+      background: rgba(239, 68, 68, 0.14);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+    }
+
+    .edit-box {
+      width: 100%;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      display: none;
+    }
+
+    .edit-box.open {
+      display: block;
+    }
+
+    .edit-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .empty {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 26px;
+      text-align: center;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <div class="topbar">
+      <div>
+        <a class="back-link" href="./painel.html">← Voltar ao Painel</a>
+        <h1>Repertório do Painel</h1>
+        <p class="subtitle">Incluir músicas, editar nome, artista, estilo e visibilidade</p>
+      </div>
+      <button id="btnRecarregar" type="button">Atualizar lista</button>
+    </div>
+
+    <section class="panel-box">
+      <h2>Incluir nova música</h2>
+      <form id="formAddMusica">
+        <div class="form-grid">
+          <div class="field">
+            <label for="addMusica">Nome da música *</label>
+            <input id="addMusica" type="text" placeholder="Ex.: Faz Uma Loucura por Mim" required />
+          </div>
+          <div class="field">
+            <label for="addArtista">Artista</label>
+            <input id="addArtista" type="text" placeholder="Ex.: Alcione" />
+          </div>
+          <div class="field">
+            <label for="addEstilo">Estilo</label>
+            <input id="addEstilo" type="text" placeholder="Ex.: Samba, Pagode, Forró..." />
+          </div>
+          <div class="field">
+            <label for="addVisivel">Visibilidade</label>
+            <select id="addVisivel">
+              <option value="visivel" selected>Visível</option>
+              <option value="nao_visivel">Não Visível</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-top: 12px;">
+          <button class="btn-primary" type="submit">+ Adicionar música</button>
+        </div>
+      </form>
+    </section>
+
+    <div class="filters-bar">
+      <div class="filters-left">
+        <input id="buscaTexto" type="text" placeholder="Buscar por música, artista ou estilo..." style="max-width: 280px;" />
+        <select id="filtroEstilo" style="max-width: 180px;">
+          <option value="">Todos os estilos</option>
+        </select>
+        <select id="filtroVisivel" style="max-width: 170px;">
+          <option value="todos">Visível e Não Visível</option>
+          <option value="visivel">Apenas Visível</option>
+          <option value="nao_visivel">Apenas Não Visível</option>
+        </select>
+      </div>
+      <div id="contadorMusicas" class="subtitle">0 música(s)</div>
+    </div>
+
+    <div id="statusMsg" class="status-msg"></div>
+    <div id="listaRepertorio" class="list"></div>
+  </main>
+
+  <script>
+    const API_URL = 'https://script.google.com/macros/s/AKfycbyWx02nFN3Y8EFe8N6NzIiK_TSI6OijZrQfmfsPQi-eJdNw9U_1ICEjVCRH3lC9l_1c/exec';
+
+    let repertorioCache = [];
+    let editandoId = null;
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function setStatus(msg) {
+      document.getElementById('statusMsg').textContent = msg;
+    }
+
+    function atualizarFiltroEstilos() {
+      const selectEstilo = document.getElementById('filtroEstilo');
+      const valorAtual = selectEstilo.value;
+
+      const estilos = [...new Set(
+        repertorioCache
+          .map(item => String(item.estilo || '').trim())
+          .filter(Boolean)
+      )].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
+      selectEstilo.innerHTML = '<option value="">Todos os estilos</option>' +
+        estilos.map(est => `<option value="${escapeHtml(est)}">${escapeHtml(est)}</option>`).join('');
+
+      if (estilos.includes(valorAtual)) {
+        selectEstilo.value = valorAtual;
+      }
+    }
+
+    async function carregarRepertorio() {
+      setStatus('Carregando repertório...');
+      try {
+        const resp = await fetch(`${API_URL}?action=getRepertorio&t=${Date.now()}`);
+        const data = await resp.json();
+        if (!data.ok) throw new Error(data.error || 'Erro ao carregar repertório');
+
+        repertorioCache = Array.isArray(data.repertorio) ? data.repertorio : [];
+        atualizarFiltroEstilos();
+        renderizarRepertorio();
+        setStatus(`Repertório atualizado às ${new Date().toLocaleTimeString('pt-BR')}.`);
+      } catch (err) {
+        setStatus(`Erro: ${err.message}`);
+      }
+    }
+
+    document.getElementById('formAddMusica').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const musica = document.getElementById('addMusica').value.trim();
+      const artista = document.getElementById('addArtista').value.trim();
+      const estilo = document.getElementById('addEstilo').value.trim();
+      const visivel = document.getElementById('addVisivel').value;
+
+      if (!musica) return;
+      setStatus('Adicionando música...');
+
+      try {
+        const url = `${API_URL}?action=addMusica`
+          + `&musica=${encodeURIComponent(musica)}`
+          + `&artista=${encodeURIComponent(artista)}`
+          + `&estilo=${encodeURIComponent(estilo)}`
+          + `&visivel=${encodeURIComponent(visivel)}`
+          + `&t=${Date.now()}`;
+
+        const resp = await fetch(url);
+        const data = await resp.json();
+        if (!data.ok) throw new Error(data.error || 'Falha ao adicionar');
+
+        document.getElementById('formAddMusica').reset();
+        await carregarRepertorio();
+        setStatus(`Música "${musica}" adicionada.`);
+      } catch (err) {
+        setStatus(`Erro ao adicionar: ${err.message}`);
+      }
+    });
+
+    function abrirEdicao(id) {
+      editandoId = editandoId === id ? null : id;
+      renderizarRepertorio();
+    }
+
+    async function salvarEdicao(id) {
+      const musica = document.getElementById(`edit-musica-${id}`).value.trim();
+      const artista = document.getElementById(`edit-artista-${id}`).value.trim();
+      const estilo = document.getElementById(`edit-estilo-${id}`).value.trim();
+      const visivel = document.getElementById(`edit-visivel-${id}`).value;
+
+      if (!musica) {
+        setStatus('O nome da música não pode ficar vazio.');
+        return;
+      }
+
+      setStatus('Salvando alterações...');
+      try {
+        const url = `${API_URL}?action=updateMusica`
+          + `&id=${encodeURIComponent(id)}`
+          + `&musica=${encodeURIComponent(musica)}`
+          + `&artista=${encodeURIComponent(artista)}`
+          + `&estilo=${encodeURIComponent(estilo)}`
+          + `&visivel=${encodeURIComponent(visivel)}`
+          + `&t=${Date.now()}`;
+
+        const resp = await fetch(url);
+        const data = await resp.json();
+        if (!data.ok) throw new Error(data.error || 'Falha ao salvar');
+
+        editandoId = null;
+        await carregarRepertorio();
+        setStatus(`Música "${musica}" atualizada.`);
+      } catch (err) {
+        setStatus(`Erro ao salvar: ${err.message}`);
+      }
+    }
+
+    async function alternarVisibilidade(id) {
+      setStatus('Atualizando visibilidade...');
+      try {
+        const url = `${API_URL}?action=toggleVisivel&id=${encodeURIComponent(id)}&t=${Date.now()}`;
+        const resp = await fetch(url);
+        const data = await resp.json();
+        if (!data.ok) throw new Error(data.error || 'Falha ao alterar visibilidade');
+
+        repertorioCache = repertorioCache.map(item =>
+          String(item.id) === String(id) ? { ...item, visivel: data.visivel } : item
+        );
+        renderizarRepertorio();
+        setStatus(`Visibilidade alterada para ${data.visivel === 'visivel' ? 'Visível' : 'Não Visível'}.`);
+      } catch (err) {
+        setStatus(`Erro: ${err.message}`);
+      }
+    }
+
+    function renderizarRepertorio() {
+      const container = document.getElementById('listaRepertorio');
+      const contador = document.getElementById('contadorMusicas');
+      const busca = document.getElementById('buscaTexto').value.trim().toLowerCase();
+      const estiloFiltro = document.getElementById('filtroEstilo').value;
+      const visivelFiltro = document.getElementById('filtroVisivel').value;
+
+      const filtrados = repertorioCache.filter(item => {
+        const vis = item.visivel === 'nao_visivel' ? 'nao_visivel' : 'visivel';
+        if (visivelFiltro !== 'todos' && vis !== visivelFiltro) return false;
+        if (estiloFiltro && String(item.estilo || '').trim() !== estiloFiltro) return false;
+
+        if (busca) {
+          const alvo = `${item.musica || ''} ${item.artista || ''} ${item.estilo || ''}`.toLowerCase();
+          if (!alvo.includes(busca)) return false;
+        }
+        return true;
+      });
+
+      contador.textContent = `${filtrados.length} música(s)`;
+
+      if (!filtrados.length) {
+        container.innerHTML = '<div class="empty">Nenhuma música encontrada no repertório.</div>';
+        return;
+      }
+
+      container.innerHTML = filtrados.map(item => {
+        const isVisivel = item.visivel !== 'nao_visivel';
+        const isEditing = String(editandoId) === String(item.id);
+        const safeId = escapeHtml(item.id);
+
+        return `
+          <article class="song-card">
+            <div>
+              <div class="song-title">${escapeHtml(item.musica)}</div>
+              <div class="song-meta">
+                ${item.artista ? `Artista: ${escapeHtml(item.artista)}` : 'Artista não informado'}
+                ${item.estilo ? ` • Estilo: <strong>${escapeHtml(item.estilo)}</strong>` : ''}
+              </div>
+            </div>
+
+            <div class="song-right">
+              <span class="${isVisivel ? 'tag-visivel' : 'tag-oculto'}">
+                ${isVisivel ? 'Visível' : 'Não Visível'}
+              </span>
+              <button type="button" onclick="alternarVisibilidade('${safeId}')">
+                ${isVisivel ? 'Deixar Não Visível' : 'Deixar Visível'}
+              </button>
+              <button type="button" onclick="abrirEdicao('${safeId}')">
+                ${isEditing ? 'Fechar' : 'Editar'}
+              </button>
+            </div>
+
+            <div class="edit-box ${isEditing ? 'open' : ''}">
+              <div class="form-grid">
+                <div class="field">
+                  <label>Nome da música</label>
+                  <input id="edit-musica-${safeId}" type="text" value="${escapeHtml(item.musica)}" />
+                </div>
+                <div class="field">
+                  <label>Artista</label>
+                  <input id="edit-artista-${safeId}" type="text" value="${escapeHtml(item.artista)}" />
+                </div>
+                <div class="field">
+                  <label>Estilo</label>
+                  <input id="edit-estilo-${safeId}" type="text" value="${escapeHtml(item.estilo)}" />
+                </div>
+                <div class="field">
+                  <label>Visibilidade</label>
+                  <select id="edit-visivel-${safeId}">
+                    <option value="visivel" ${isVisivel ? 'selected' : ''}>Visível</option>
+                    <option value="nao_visivel" ${!isVisivel ? 'selected' : ''}>Não Visível</option>
+                  </select>
+                </div>
+              </div>
+              <div class="edit-actions">
+                <button class="btn-primary" type="button" onclick="salvarEdicao('${safeId}')">Salvar alterações</button>
+                <button type="button" onclick="abrirEdicao('${safeId}')">Cancelar</button>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    document.getElementById('btnRecarregar').addEventListener('click', carregarRepertorio);
+    document.getElementById('buscaTexto').addEventListener('input', renderizarRepertorio);
+    document.getElementById('filtroEstilo').addEventListener('change', renderizarRepertorio);
+    document.getElementById('filtroVisivel').addEventListener('change', renderizarRepertorio);
+
+    carregarRepertorio();
+  </script>
+</body>
+</html>
