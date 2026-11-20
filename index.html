@@ -640,9 +640,9 @@
 
 const STORAGE_KEY = 'cardapio_musical_pedidos_v1';
 const PEDIDOS_API_URL = 'https://script.google.com/macros/s/AKfycbxTP_z5sV_lavHut4p_l9_fOoH5NzmU9JpLZimJ1zvKBvKna2rqXYSqj2rWTZuJJ28q/exec';
-
+const REPERTORIO_API_URL = 'https://script.google.com/macros/s/AKfycbyWx02nFN3Y8EFe8N6NzIiK_TSI6OijZrQfmfsPQi-eJdNw9U_1ICEjVCRH3lC9l_1c/exec';
 async function enviarPedidoParaPlanilha(pedido) {
-    const REPERTORIO_API_URL = 'https://script.google.com/macros/s/AKfycbyWx02nFN3Y8EFe8N6NzIiK_TSI6OijZrQfmfsPQi-eJdNw9U_1ICEjVCRH3lC9l_1c/exec';
+    
 
 function normalizarRepertorioExterno(lista) {
     if (!Array.isArray(lista) || !lista.length) return null;
