@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel de Pedidos — Cardápio Musical</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --card: #171a21;
+      --border: #262b36;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --accent: #f59e0b;
+      --ok: #10b981;
+      --warn: #eab308;
+      --danger: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 20px 14px 48px;
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    .topbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text);
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 8px 12px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 0.88rem;
+      margin-bottom: 8px;
+    }
+
+    .back-link:hover {
+      border-color: var(--accent);
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      color: var(--accent);
+    }
+
+    .subtitle {
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    button {
+      font-family: inherit;
+      cursor: pointer;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      padding: 8px 12px;
+      font-size: 0.86rem;
+      font-weight: 600;
+    }
+
+    button:hover {
+      border-color: var(--accent);
+    }
+
+    .filters-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .filter-btn.active {
+      background: var(--accent);
+      color: #111827;
+      border-color: var(--accent);
+    }
+
+    .meta-info {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .status-bar {
+      font-size: 0.84rem;
+      color: var(--muted);
+      margin-bottom: 12px;
+      min-height: 20px;
+    }
+
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .musica {
+      font-size: 1.08rem;
+      font-weight: 700;
+    }
+
+    .artista {
+      font-size: 0.9rem;
+      color: var(--accent);
+      margin-top: 2px;
+    }
+
+    .badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .badge-pendente {
+      color: #facc15;
+      background: rgba(234, 179, 8, 0.14);
+      border-color: rgba(234, 179, 8, 0.35);
+    }
+
+    .badge-tocada {
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.14);
+      border-color: rgba(16, 185, 129, 0.35);
+    }
+
+    .badge-cancelada {
+      color: #f87171;
+      background: rgba(239, 68, 68, 0.14);
+      border-color: rgba(239, 68, 68, 0.35);
+    }
+
+    .pix-tag {
+      display: inline-block;
+      color: #6ee7b7;
+      font-weight: 600;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .btn-ok {
+      border-color: rgba(16, 185, 129, 0.45);
+      color: #6ee7b7;
+    }
+
+    .btn-warn {
+      border-color: rgba(234, 179, 8, 0.45);
+      color: #fde047;
+    }
+
+    .btn-danger {
+      border-color: rgba(239, 68, 68, 0.45);
+      color: #fca5a5;
+    }
+
+    .empty {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px;
+      text-align: center;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <div class="topbar">
+      <div>
+        <a class="back-link" href="./painel.html">← Voltar ao Painel</a>
+        <h1>Painel de Pedidos</h1>
+        <p class="subtitle">Cardápio Musical — Controle em tempo real</p>
+      </div>
+      <div class="controls">
+        <button id="btnRefresh" type="button">Atualizar agora</button>
+        <button id="btnAuto" type="button">Auto: OFF</button>
+      </div>
+    </div>
+
+    <div class="filters-row">
+      <div class="filters">
+        <button class="filter-btn active" data-filter="todos" type="button">Todos</button>
+        <button class="filter-btn" data-filter="pendente" type="button">Pendentes</button>
+        <button class="filter-btn" data-filter="tocada" type="button">Tocadas</button>
+        <button class="filter-btn" data-filter="cancelada" type="button">Canceladas</button>
+      </div>
+      <div id="countInfo" class="meta-info">0 pedido(s)</div>
+    </div>
+
+    <div id="statusInfo" class="status-bar"></div>
+    <div id="listaPedidos" class="list"></div>
+  </main>
+
+  <script>
+    const API_URL = 'https://script.google.com/macros/s/AKfycbyWx02nFN3Y8EFe8N6NzIiK_TSI6OijZrQfmfsPQi-eJdNw9U_1ICEjVCRH3lC9l_1c/exec';
+
+    let pedidosCache = [];
+    let filtroAtual = 'todos';
+    let autoTimer = null;
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function formatPix(valor) {
+      const num = Number(String(valor || '').replace(',', '.'));
+      if (!valor || Number.isNaN(num) || num <= 0) return '';
+      return `Pix: ${num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`;
+    }
+
+    async function carregarPedidos() {
+      const statusInfo = document.getElementById('statusInfo');
+      statusInfo.textContent = 'Carregando pedidos...';
+
+      try {
+        const resp = await fetch(`${API_URL}?t=${Date.now()}`);
+        const data = await resp.json();
+        if (!data.ok) throw new Error(data.error || 'Erro ao buscar pedidos');
+
+        pedidosCache = Array.isArray(data.pedidos) ? data.pedidos : [];
+        renderizarPedidos();
+
+        const agora = new Date().toLocaleTimeString('pt-BR');
+        statusInfo.textContent = `Atualizado às ${agora}`;
+      } catch (err) {
+        statusInfo.textContent = `Erro ao carregar: ${err.message}`;
+      }
+    }
+
+    async function atualizarStatus(id, novoStatus) {
+      const statusInfo = document.getElementById('statusInfo');
+      statusInfo.textContent = `Atualizando para "${novoStatus}"...`;
+
+      try {
+        const url = `${API_URL}?action=updateStatus&id=${encodeURIComponent(id)}&status=${encodeURIComponent(novoStatus)}&t=${Date.now()}`;
+        const resp = await fetch(url);
+        const data = await resp.json();
+        if (!data.ok) throw new Error(data.error || 'Não foi possível atualizar');
+
+        pedidosCache = pedidosCache.map(p =>
+          String(p.id) === String(id) ? { ...p, status: novoStatus } : p
+        );
+        renderizarPedidos();
+        statusInfo.textContent = `Pedido atualizado para "${novoStatus}".`;
+      } catch (err) {
+        statusInfo.textContent = `Erro ao atualizar: ${err.message}`;
+      }
+    }
+
+    function renderizarPedidos() {
+      const container = document.getElementById('listaPedidos');
+      const countInfo = document.getElementById('countInfo');
+
+      const filtrados = pedidosCache.filter(p => {
+        const st = String(p.status || 'pendente').toLowerCase();
+        if (filtroAtual === 'todos') return true;
+        return st === filtroAtual;
+      });
+
+      countInfo.textContent = `${filtrados.length} pedido(s)`;
+
+      if (!filtrados.length) {
+        container.innerHTML = '<div class="empty">Nenhum pedido encontrado neste filtro.</div>';
+        return;
+      }
+
+      container.innerHTML = filtrados.map(p => {
+        const st = String(p.status || 'pendente').toLowerCase();
+        const badgeClass = st === 'tocada'
+          ? 'badge-tocada'
+          : st === 'cancelada'
+            ? 'badge-cancelada'
+            : 'badge-pendente';
+
+        const pixTexto = formatPix(p.pix_valor);
+
+        return `
+          <article class="card">
+            <div class="card-top">
+              <div>
+                <div class="musica">${escapeHtml(p.musica || 'Música sem título')}</div>
+                <div class="artista">${escapeHtml(p.artista_estilo || '')}</div>
+              </div>
+              <span class="badge ${badgeClass}">${escapeHtml(st)}</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 4px; font-size: 0.88rem; color: var(--muted);">
+              ${p.cliente ? (() => {
+                const raw = String(p.cliente).trim();
+                const partes = raw.split(' - ');
+                const nome = partes.length > 1 ? partes.shift().trim() : raw;
+                const msg = partes.join(' - ').trim();
+                return `
+                  ${nome ? `<div>👤 <strong>Nome:</strong> ${escapeHtml(nome)}</div>` : ''}
+                  ${msg ? `<div>💬 <strong>Mensagem:</strong> ${escapeHtml(msg)}</div>` : ''}
+                `;
+              })() : ''}
+              ${pixTexto ? `<div class="pix-tag" style="margin-top: 2px;">💸 ${pixTexto}</div>` : ''}
+            </div>
+
+            <div class="actions">
+              <button class="btn-ok" onclick="atualizarStatus('${escapeHtml(p.id)}', 'tocada')" type="button">✓ Tocada</button>
+              <button class="btn-warn" onclick="atualizarStatus('${escapeHtml(p.id)}', 'pendente')" type="button">⏳ Pendente</button>
+              <button class="btn-danger" onclick="atualizarStatus('${escapeHtml(p.id)}', 'cancelada')" type="button">✕ Cancelar</button>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        filtroAtual = btn.dataset.filter;
+        renderizarPedidos();
+      });
+    });
+
+    document.getElementById('btnRefresh').addEventListener('click', carregarPedidos);
+
+    document.getElementById('btnAuto').addEventListener('click', function () {
+      if (autoTimer) {
+        clearInterval(autoTimer);
+        autoTimer = null;
+        this.textContent = 'Auto: OFF';
+      } else {
+        carregarPedidos();
+        autoTimer = setInterval(carregarPedidos, 15000);
+        this.textContent = 'Auto: 15s';
+      }
+    });
+
+    carregarPedidos();
+  </script>
+</body>
+</html>
