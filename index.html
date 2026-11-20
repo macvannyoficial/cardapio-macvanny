@@ -1545,6 +1545,13 @@ let activeRequestId = null;
                 repertorio.length = 0;
                 repertorio.push(...itensVisiveis);
                 jaCarregouPlanilha = true;
+               if (typeof populateArtists === 'function') {
+                  const artistSelect = document.getElementById("artistSelect");
+                  if (artistSelect) {
+                    artistSelect.innerHTML = '<option value="">Escolha um Artista</option>';
+                  }
+                  populateArtists();
+                }   
 
                 if (typeof filterSongs === 'function') {
                   filterSongs();
