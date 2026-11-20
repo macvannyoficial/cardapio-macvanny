@@ -672,12 +672,12 @@ async function inicializarCardapio() {
     try {
         const resp = await fetch(`${REPERTORIO_API_URL}?action=getRepertorio&modo=cardapio&t=${Date.now()}`);
         const data = await resp.json();
-        if (data && data.ok && Array.isArray(data.repertorio) && data.repertorio.length) {
-            const normalizada = normalizarRepertorioExterno(data.repertorio);
-            if (normalizada && normalizada.length) {
-                repertorio = normalizada;
-            }
-        }
+        if (data && data.ok && Array.isArray(data.repertorio)) {
+         const normalizada = normalizarRepertorioExterno(data.repertorio);
+         if (Array.isArray(normalizada)) {
+             repertorio = normalizada;
+         }
+     }
     } catch (err) {
         console.warn('Usando repertório local como fallback:', err);
     }
