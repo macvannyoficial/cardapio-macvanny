@@ -444,7 +444,6 @@
       margin-top: 12px;
     }
 
-    /* Visualização de músicas e estilos selecionados */
     .inspector-box {
       background: var(--card);
       border: 1px solid var(--accent);
@@ -482,14 +481,20 @@
       margin-bottom: 12px;
     }
 
-    .style-chip {
-      font-size: 0.8rem;
-      font-weight: 600;
-      padding: 5px 10px;
+    .style-btn {
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 6px 12px;
       border-radius: 999px;
-      background: rgba(245, 158, 11, 0.14);
+      background: rgba(245, 158, 11, 0.12);
       color: #fbbf24;
       border: 1px solid rgba(245, 158, 11, 0.35);
+    }
+
+    .style-btn.active {
+      background: var(--accent);
+      color: #111827;
+      border-color: var(--accent);
     }
 
     .selected-songs-list {
@@ -592,10 +597,10 @@
           <button id="btnFecharInspecao" type="button">Fechar</button>
         </div>
 
-        <div class="inspector-section-title">Estilos selecionados neste repertório</div>
+        <div class="inspector-section-title">Estilos selecionados neste repertório (clique para filtrar)</div>
         <div id="estilosSelecionadosLista" class="styles-chips"></div>
 
-        <div class="inspector-section-title">Músicas selecionadas neste repertório</div>
+        <div id="tituloListaInspecao" class="inspector-section-title">Músicas selecionadas neste repertório</div>
         <div id="musicasSelecionadasLista" class="selected-songs-list"></div>
       </section>
 
@@ -656,6 +661,7 @@
     let editandoId = null;
     let slotSelecionadoId = 'slot_1';
     let slotInspecionadoId = null;
+    let estiloInspecaoAtivo = '';
     let idsSelecionadosNoEditor = new Set();
 
     function escapeHtml(str) {
@@ -1037,6 +1043,9 @@
     }
 
     function verMusicasEEstilos(slotId) {
+      if (slotInspecionadoId !== slotId) {
+        estiloInspecaoAtivo = '';
+      }
       slotInspecionadoId = slotId;
       document.getElementById('painelInspecaoSlot').classList.add('open');
       renderizarInspecaoSlot(slotId);
@@ -1049,6 +1058,9 @@
       const ambienteAtual = document.getElementById('slotAmbiente').value.trim() || (slot ? slot.ambiente : '');
       const idsAtuais = Array.from(idsSelecionadosNoEditor);
 
+      if (slotInspecionadoId !== '__editor_atual__') {
+        estiloInspecaoAtivo = '';
+      }
       slotInspecionadoId = '__editor_atual__';
       document.getElementById('painelInspecaoSlot').classList.add('open');
       renderizarDadosInspecao({
@@ -1058,6 +1070,13 @@
         permitirRemover: true
       });
       document.getElementById('painelInspecaoSlot').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function selecionarEstiloInspecao(estilo) {
+      estiloInspecaoAtivo = estiloInspecaoAtivo === estilo ? '' : estilo;
+      if (slotInspecionadoId) {
+        renderizarInspecaoSlot(slotInspecionadoId);
+      }
     }
 
     function renderizarInspecaoSlot(slotId) {
@@ -1091,6 +1110,10 @@
       const estilosOrdenados = Array.from(contagemEstilos.entries())
         .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'pt-BR'));
 
+      if (estiloInspecaoAtivo && !contagemEstilos.has(estiloInspecaoAtivo)) {
+        estiloInspecaoAtivo = '';
+      }
+
       document.getElementById('tituloInspecao').textContent = `Músicas e Estilos — ${nome}`;
       document.getElementById('subtituloInspecao').textContent =
         `${ambiente ? `Ambiente: ${ambiente} • ` : ''}${selecionadas.length} música(s) • ${estilosOrdenados.length} estilo(s)`;
@@ -1099,16 +1122,27 @@
       if (!estilosOrdenados.length) {
         estilosEl.innerHTML = '<span class="subtitle">Nenhum estilo selecionado ainda.</span>';
       } else {
-        estilosEl.innerHTML = estilosOrdenados
-          .map(([est, qtd]) => `<span class="style-chip">${escapeHtml(est)} (${qtd})</span>`)
-          .join('');
+        const btnTodos = `<button type="button" class="style-btn ${!estiloInspecaoAtivo ? 'active' : ''}" onclick="selecionarEstiloInspecao('')">Todos (${selecionadas.length})</button>`;
+        const btnsEstilos = estilosOrdenados.map(([est, qtd]) => {
+          const ativo = estiloInspecaoAtivo === est ? 'active' : '';
+          return `<button type="button" class="style-btn ${ativo}" onclick="selecionarEstiloInspecao('${escapeHtml(est)}')">${escapeHtml(est)} (${qtd})</button>`;
+        }).join('');
+        estilosEl.innerHTML = btnTodos + btnsEstilos;
       }
 
+      const musicasFiltradas = estiloInspecaoAtivo
+        ? selecionadas.filter(m => (String(m.estilo || '').trim() || 'Sem estilo') === estiloInspecaoAtivo)
+        : selecionadas;
+
+      document.getElementById('tituloListaInspecao').textContent = estiloInspecaoAtivo
+        ? `Músicas de ${estiloInspecaoAtivo} (${musicasFiltradas.length})`
+        : `Músicas selecionadas neste repertório (${musicasFiltradas.length})`;
+
       const musicasEl = document.getElementById('musicasSelecionadasLista');
-      if (!selecionadas.length) {
-        musicasEl.innerHTML = '<div class="empty">Nenhuma música selecionada neste repertório ainda.</div>';
+      if (!musicasFiltradas.length) {
+        musicasEl.innerHTML = '<div class="empty">Nenhuma música encontrada para este filtro.</div>';
       } else {
-        musicasEl.innerHTML = selecionadas.map((m, idx) => `
+        musicasEl.innerHTML = musicasFiltradas.map((m, idx) => `
           <div class="selected-song-row">
             <div>
               <div class="check-title">${idx + 1}. ${escapeHtml(m.musica)}</div>
@@ -1133,6 +1167,7 @@
 
     function fecharInspecao() {
       slotInspecionadoId = null;
+      estiloInspecaoAtivo = '';
       document.getElementById('painelInspecaoSlot').classList.remove('open');
     }
 
