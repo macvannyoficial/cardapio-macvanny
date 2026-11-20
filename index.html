@@ -2209,7 +2209,51 @@ function populateGenres(songsSource) {
             document.getElementById("artistSelect").value = "";
             filterSongs();
         }
+const REPERTORIO_API_URL = 'https://script.google.com/macros/s/AKfycbyWx02nFN3Y8EFe8N6NzIiK_TSI6OijZrQfmfsPQi-eJdNw9U_1ICEjVCRH3lC9l_1c/exec';
 
+function normalizarRepertorioExterno(lista) {
+    if (!Array.isArray(lista) || !lista.length) return null;
+    return lista.map(item => {
+        const visivelFlag =
+            item.visivel === 'nao_visivel' ||
+            item.visivel === false ||
+            item.visivel === 'false' ||
+            item.visivel === 0
+                ? false
+                : true;
+
+        return {
+            titulo: String(item.musica || item.titulo || '').trim(),
+            artista: String(item.artista || '').trim(),
+            estilo: String(item.estilo || '').trim(),
+            tom: String(item.tom || '').trim(),
+            capo: String(item.capo || '').trim(),
+            visivel: visivelFlag
+        };
+    }).filter(m => m.titulo);
+}
+
+async function inicializarCardapio() {
+    applyMediaAssets();
+
+    try {
+        const resp = await fetch(`${REPERTORIO_API_URL}?action=getRepertorio&t=${Date.now()}`);
+        const data = await resp.json();
+        if (data && data.ok && Array.isArray(data.repertorio) && data.repertorio.length) {
+            const normalizada = normalizarRepertorioExterno(data.repertorio);
+            if (normalizada && normalizada.length) {
+                repertorio = normalizada;
+            }
+        }
+    } catch (err) {
+        console.warn('Usando repertório local como fallback:', err);
+    }
+
+    populateGenres();
+    populateArtists();
+    updateRequestBadge();
+    displaySongs([], false);
+}
        inicializarCardapio();
     </script>
 </body>
