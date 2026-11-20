@@ -8,15 +8,15 @@
   "theme_color": "#121212",
   "icons": [
     {
-      "src": "https://macvannyoficial.github.io/cardapio-macvanny/logo.png?v=2",
+      "src": "https://macvannyoficial.github.io/cardapio-macvanny/logo%20mac.jpg?v=5",
       "sizes": "192x192",
-      "type": "image/png",
+      "type": "image/jpeg",
       "purpose": "any"
     },
     {
-      "src": "https://macvannyoficial.github.io/cardapio-macvanny/logo.png?v=2",
+      "src": "https://macvannyoficial.github.io/cardapio-macvanny/logo%20mac.jpg?v=5",
       "sizes": "512x512",
-      "type": "image/png",
+      "type": "image/jpeg",
       "purpose": "any"
     }
   ]
