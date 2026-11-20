@@ -1515,7 +1515,62 @@ let activeRequestId = null;
             { titulo: "ZÉ DA RECAÍDA", artista: "Gusttavo Lima", estilo: "Sertanejo", tom: "F", capo: "não", visivel: true },
             { titulo: "Zóio de Lula", artista: "Charlie Brown Jr", estilo: "Rock", tom: "C#m", capo: "não", visivel: true }
         ];
+(function conectarRepertorioPlanilha() {
+          const API_REPERTORIO_URL = 'https://script.google.com/macros/s/AKfycbyWx02nFN3Y8EFe8N6NzIiK_TSI6OijZrQfmfsPQi-eJdNw9U_1ICEjVCRH3lC9l_1c/exec';
+          let carregandoPlanilha = false;
+          let jaCarregouPlanilha = false;
 
+          async function sincronizarRepertorio(forcar) {
+            if (carregandoPlanilha) return;
+            if (jaCarregouPlanilha && !forcar) return;
+            carregandoPlanilha = true;
+
+            try {
+              const resp = await fetch(`${API_REPERTORIO_URL}?action=getRepertorio&t=${Date.now()}`);
+              const data = await resp.json();
+              if (!data || !data.ok || !Array.isArray(data.repertorio)) return;
+
+              const itensVisiveis = data.repertorio
+                .filter(item => item && String(item.musica || '').trim() !== '' && item.visivel !== 'nao_visivel')
+                .map(item => ({
+                  titulo: String(item.musica || '').trim(),
+                  artista: String(item.artista || '').trim(),
+                  estilo: String(item.estilo || '').trim(),
+                  tom: '',
+                  capo: '',
+                  visivel: true
+                }));
+
+              if (itensVisiveis.length > 0 && Array.isArray(repertorio)) {
+                repertorio.length = 0;
+                repertorio.push(...itensVisiveis);
+                jaCarregouPlanilha = true;
+
+                if (typeof filterSongs === 'function') {
+                  filterSongs();
+                }
+              }
+            } catch (e) {
+              // Mantém o repertório local caso haja falha temporária de conexão
+            } finally {
+              carregandoPlanilha = false;
+            }
+          }
+
+          const menuOriginal = typeof openMenuScreen === 'function' ? openMenuScreen : null;
+          if (menuOriginal) {
+            window.openMenuScreen = function () {
+              menuOriginal();
+              sincronizarRepertorio(false);
+            };
+          }
+
+          if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => sincronizarRepertorio(false));
+          } else {
+            sincronizarRepertorio(false);
+          }
+        })();
         function openLandingScreen() {
             document.getElementById("landingView").style.display = "flex";
             document.getElementById("catalogView").style.display = "none";
