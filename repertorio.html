@@ -718,33 +718,33 @@
         selectFiltro.value = valorAtualFiltro;
       }
 function atualizarFiltroArtistas() {
-  const artistas = [...new Set(
-    repertorioCache
-      .map(item => String(item.artista || '').trim())
-      .filter(Boolean)
- )].sort((a, b) => a.localeCompare(b, 'pt-BR', { sensitivity: 'base' }));
+      const artistas = [...new Set(
+        repertorioCache
+          .map(item => String(item.artista || '').trim())
+          .filter(Boolean)
+      )].sort((a, b) => a.localeCompare(b, 'pt-BR', { sensitivity: 'base' }));
 
-  const selectArtista = document.getElementById('filtroArtista');
-  if (!selectArtista) return;
+      const selectArtista = document.getElementById('filtroArtista');
+      if (!selectArtista) return;
 
-  const valorAtualArtista = selectArtista.value;
-  selectArtista.innerHTML = '<option value="">Artistas</option>' +
-    artistas.map(art => `<option value="${escapeHtml(art)}">${escapeHtml(art)}</option>`).join('');
+      const valorAtualArtista = selectArtista.value;
+      selectArtista.innerHTML = '<option value="">Artistas</option>' +
+        artistas.map(art => `<option value="${escapeHtml(art)}">${escapeHtml(art)}</option>`).join('');
 
-  if (artistas.includes(valorAtualArtista)) {
-    selectArtista.value = valorAtualArtista;
-  }
-const selectSlotArtista = document.getElementById('filtroArtistaSlot');
-  if (selectSlotArtista) {
-    const valorAtualSlot = selectSlotArtista.value;
-    selectSlotArtista.innerHTML = '<option value="">Todos os artistas</option>' +
-      artistas.map(art => `<option value="${escapeHtml(art)}">${escapeHtml(art)}</option>`).join('');
-    if (artistas.includes(valorAtualSlot)) {
-      selectSlotArtista.value = valorAtualSlot;
+      if (artistas.includes(valorAtualArtista)) {
+        selectArtista.value = valorAtualArtista;
+      }
+
+      const selectSlotArtista = document.getElementById('filtroArtistaSlot');
+      if (selectSlotArtista) {
+        const valorAtualSlot = selectSlotArtista.value;
+        selectSlotArtista.innerHTML = '<option value="">Todos os artistas</option>' +
+          artistas.map(art => `<option value="${escapeHtml(art)}">${escapeHtml(art)}</option>`).join('');
+        if (artistas.includes(valorAtualSlot)) {
+          selectSlotArtista.value = valorAtualSlot;
+        }
+      }
     }
-  }
-   
-
     async function carregarRepertorio() {
       setStatus('Carregando Minhas Músicas...');
       try {
