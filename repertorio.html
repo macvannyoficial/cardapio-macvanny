@@ -703,7 +703,7 @@
         : 'Gerencie até 10 cardápios para diferentes ambientes e defina qual fica visível ao público';
     }
 
-    function atualizarFiltroEstilos() {
+function atualizarFiltroEstilos() {
       const estilos = [...new Set(
         repertorioCache
           .map(item => String(item.estilo || '').trim())
@@ -716,6 +716,16 @@
         estilos.map(est => `<option value="${escapeHtml(est)}">${escapeHtml(est)}</option>`).join('');
       if (estilos.includes(valorAtualFiltro)) {
         selectFiltro.value = valorAtualFiltro;
+      }
+
+      const selectSlotEstilo = document.getElementById('filtroEstiloSlot');
+      if (selectSlotEstilo) {
+        const valorAtualSlot = selectSlotEstilo.value;
+        selectSlotEstilo.innerHTML = '<option value="">Todos os estilos</option>' +
+          estilos.map(est => `<option value="${escapeHtml(est)}">${escapeHtml(est)}</option>`).join('');
+        if (estilos.includes(valorAtualSlot)) {
+          selectSlotEstilo.value = valorAtualSlot;
+        }
       }
     }
 function atualizarFiltroArtistas() {
