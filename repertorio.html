@@ -568,8 +568,11 @@
         <div class="filters-left">
           <input id="buscaTexto" type="text" placeholder="Buscar por música, artista ou estilo..." style="max-width: 300px;" />
           <select id="filtroEstilo" style="max-width: 200px;">
-            <option value="">Todos os estilos</option>
-          </select>
+        <option value="">Todos os estilos</option>
+      </select>
+      <select id="filtroArtista" style="max-width: 200px;">
+        <option value="">Artistas</option>
+      </select>
         </div>
         <div id="contadorMusicas" class="subtitle">0 música(s)</div>
       </div>
@@ -711,7 +714,24 @@
       if (estilos.includes(valorAtualFiltro)) {
         selectFiltro.value = valorAtualFiltro;
       }
+function atualizarFiltroArtistas() {
+  const artistas = [...new Set(
+    repertorioCache
+      .map(item => String(item.artista || '').trim())
+      .filter(Boolean)
+ )].sort((a, b) => a.localeCompare(b, 'pt-BR', { sensitivity: 'base' }));
 
+  const selectArtista = document.getElementById('filtroArtista');
+  if (!selectArtista) return;
+
+  const valorAtualArtista = selectArtista.value;
+  selectArtista.innerHTML = '<option value="">Artistas</option>' +
+    artistas.map(art => `<option value="${escapeHtml(art)}">${escapeHtml(art)}</option>`).join('');
+
+  if (artistas.includes(valorAtualArtista)) {
+    selectArtista.value = valorAtualArtista;
+  }
+}
       const selectSlotFiltro = document.getElementById('filtroEstiloSlot');
       const valorAtualSlotFiltro = selectSlotFiltro.value;
       selectSlotFiltro.innerHTML = '<option value="">Todos os estilos</option>' +
@@ -907,9 +927,10 @@
       const contador = document.getElementById('contadorMusicas');
       const busca = document.getElementById('buscaTexto').value.trim().toLowerCase();
       const estiloFiltro = document.getElementById('filtroEstilo').value;
-
+const artistaFiltro = document.getElementById('filtroArtista')?.value || '';
       const filtrados = repertorioCache.filter(item => {
         if (estiloFiltro && String(item.estilo || '').trim() !== estiloFiltro) return false;
+        if (artistaFiltro && String(item.artista || '').trim() !== artistaFiltro) return false;
         if (busca) {
           const alvo = `${item.musica || ''} ${item.artista || ''} ${item.estilo || ''}`.toLowerCase();
           if (!alvo.includes(busca)) return false;
@@ -1330,6 +1351,7 @@
     document.getElementById('btnRecarregar').addEventListener('click', atualizarTudo);
     document.getElementById('buscaTexto').addEventListener('input', renderizarRepertorio);
     document.getElementById('filtroEstilo').addEventListener('change', renderizarRepertorio);
+    document.getElementById('filtroArtista')?.addEventListener('change', renderizarRepertorio);
     document.getElementById('slotSelect').addEventListener('change', (e) => {
       slotSelecionadoId = e.target.value;
       carregarSlotNoEditor(slotSelecionadoId);
