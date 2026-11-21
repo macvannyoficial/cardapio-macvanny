@@ -637,6 +637,9 @@
             <select id="filtroEstiloSlot" style="max-width: 190px;">
               <option value="">Todos os estilos</option>
             </select>
+            <select id="filtroArtistaSlot" style="max-width: 190px;">
+        <option value="">Todos os artistas</option>
+      </select>
           </div>
           <div class="topbar-actions">
             <button id="btnMarcarFiltradas" type="button">Marcar filtradas</button>
@@ -728,18 +731,19 @@ function atualizarFiltroArtistas() {
   selectArtista.innerHTML = '<option value="">Artistas</option>' +
     artistas.map(art => `<option value="${escapeHtml(art)}">${escapeHtml(art)}</option>`).join('');
 
-  if (artistas.includes(valorAtualArtista)) {
+  if (artistas.includes(valorAtualArtista)) }
     selectArtista.value = valorAtualArtista;
   }
-}
-      const selectSlotFiltro = document.getElementById('filtroEstiloSlot');
-      const valorAtualSlotFiltro = selectSlotFiltro.value;
-      selectSlotFiltro.innerHTML = '<option value="">Todos os estilos</option>' +
-        estilos.map(est => `<option value="${escapeHtml(est)}">${escapeHtml(est)}</option>`).join('');
-      if (estilos.includes(valorAtualSlotFiltro)) {
-        selectSlotFiltro.value = valorAtualSlotFiltro;
-      }
+const selectSlotArtista = document.getElementById('filtroArtistaSlot');
+  if (selectSlotArtista) {
+    const valorAtualSlot = selectSlotArtista.value;
+    selectSlotArtista.innerHTML = '<option value="">Todos os artistas</option>' +
+      artistas.map(art => `<option value="${escapeHtml(art)}">${escapeHtml(art)}</option>`).join('');
+    if (artistas.includes(valorAtualSlot)) {
+      selectSlotArtista.value = valorAtualSlot;
     }
+  }
+   
 
     async function carregarRepertorio() {
       setStatus('Carregando Minhas Músicas...');
@@ -754,6 +758,7 @@ function atualizarFiltroArtistas() {
   return nomeA.localeCompare(nomeB, 'pt-BR', { sensitivity: 'base' });
 });
         atualizarFiltroEstilos();
+        atualizarFiltroArtistas();
         renderizarRepertorio();
         renderizarChecklistSlot();
         if (slotInspecionadoId) {
@@ -1205,7 +1210,7 @@ const artistaFiltro = document.getElementById('filtroArtista')?.value || '';
       const box = document.getElementById('checklistMusicasSlot');
       const busca = document.getElementById('buscaSlotMusicas').value.trim().toLowerCase();
       const estiloFiltro = document.getElementById('filtroEstiloSlot').value;
-
+const artistaFiltro = document.getElementById('filtroArtistaSlot')?.value || '';
       atualizarContadorSelecionadasSlot();
 
       if (!repertorioCache.length) {
@@ -1215,6 +1220,7 @@ const artistaFiltro = document.getElementById('filtroArtista')?.value || '';
 
       const filtradas = repertorioCache.filter(item => {
         if (estiloFiltro && String(item.estilo || '').trim() !== estiloFiltro) return false;
+        if (artistaFiltro && String(item.artista || '').trim() !== artistaFiltro) return false;
         if (busca) {
           const alvo = `${item.musica || ''} ${item.artista || ''} ${item.estilo || ''}`.toLowerCase();
           if (!alvo.includes(busca)) return false;
@@ -1358,6 +1364,7 @@ const artistaFiltro = document.getElementById('filtroArtista')?.value || '';
     });
     document.getElementById('buscaSlotMusicas').addEventListener('input', renderizarChecklistSlot);
     document.getElementById('filtroEstiloSlot').addEventListener('change', renderizarChecklistSlot);
+    document.getElementById('filtroArtistaSlot')?.addEventListener('change', renderizarChecklistSlot);
     document.getElementById('btnMarcarFiltradas').addEventListener('click', marcarFiltradasNoSlot);
     document.getElementById('btnLimparSelecaoSlot').addEventListener('click', limparSelecaoSlot);
     document.getElementById('btnSalvarSlot').addEventListener('click', salvarRepertorioSlot);
