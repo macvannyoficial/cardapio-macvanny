@@ -1269,9 +1269,11 @@ const artistaFiltro = document.getElementById('filtroArtistaSlot')?.value || '';
     function marcarFiltradasNoSlot() {
       const busca = document.getElementById('buscaSlotMusicas').value.trim().toLowerCase();
       const estiloFiltro = document.getElementById('filtroEstiloSlot').value;
+      const artistaFiltro = document.getElementById('filtroArtistaSlot')?.value || ''; // <-- 1. Lê o artista selecionado
 
       repertorioCache.forEach(item => {
         if (estiloFiltro && String(item.estilo || '').trim() !== estiloFiltro) return;
+        if (artistaFiltro && String(item.artista || '').trim() !== artistaFiltro) return; // <-- 2. Ignora quem não for desse artista
         if (busca) {
           const alvo = `${item.musica || ''} ${item.artista || ''} ${item.estilo || ''}`.toLowerCase();
           if (!alvo.includes(busca)) return;
