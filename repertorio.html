@@ -728,7 +728,11 @@
         const data = await resp.json();
         if (!data.ok) throw new Error(data.error || 'Erro ao carregar músicas');
 
-        repertorioCache = Array.isArray(data.repertorio) ? data.repertorio : [];
+        repertorioCache = (Array.isArray(data.repertorio) ? data.repertorio : []).sort((a, b) => {
+  const nomeA = String(a.musica || a.nome || a.titulo || '').trim();
+  const nomeB = String(b.musica || b.nome || b.titulo || '').trim();
+  return nomeA.localeCompare(nomeB, 'pt-BR', { sensitivity: 'base' });
+});
         atualizarFiltroEstilos();
         renderizarRepertorio();
         renderizarChecklistSlot();
