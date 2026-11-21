@@ -731,7 +731,7 @@ function atualizarFiltroArtistas() {
   selectArtista.innerHTML = '<option value="">Artistas</option>' +
     artistas.map(art => `<option value="${escapeHtml(art)}">${escapeHtml(art)}</option>`).join('');
 
-  if (artistas.includes(valorAtualArtista)) }
+  if (artistas.includes(valorAtualArtista)) {
     selectArtista.value = valorAtualArtista;
   }
 const selectSlotArtista = document.getElementById('filtroArtistaSlot');
